@@ -59,7 +59,7 @@ setup(
     # and http://stackoverflow.com/questions/17366784/setuptools-unable-to-use-link-from-dependency-links/17442663#17442663
     # changing it to http://github.com/mtai/python-gearman/tarball/master#egg=gearman-2.0.0beta instead
     entry_points={
-        'console_scripts': ['morigin=morigin.cli:main',
+        'console_scripts': ['mutori=mutation_origin.cli:main',
                             ],
     }
 )
