@@ -17,16 +17,16 @@ if sys.version_info < (3, 5):
     raise RuntimeError(
         "Python-3.5 or greater is required, Python-%s used." % py_version)
 
-short_description = "morigin"
+short_description = "mutation_origin"
 
 # This ends up displayed by the installer
-long_description = """morigin
+long_description = """mutation_origin
 classifiers for mutation origin
 Version %s.
 """ % __version__
 
 setup(
-    name="morigin",
+    name="mutation_origin",
     version=__version__,
     author="Yicheng Zhu",
     author_email="gavin.huttley@anu.edu.au",
@@ -45,10 +45,11 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Operating System :: OS Independent",
     ],
-    packages=['morigin'],
+    packages=['mutation_origin'],
     install_requires=[
         'numpy',
         'cogent3',
+        'pandas',
         'click',
         'sklearn',
         'scitrack',

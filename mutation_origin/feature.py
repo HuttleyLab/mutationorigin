@@ -2,7 +2,7 @@
 from itertools import combinations, product
 from scipy.special import binom
 from sklearn.preprocessing import LabelEncoder
-from morigin.util import BASES, MUTATION_DIRECTIONS
+from mutation_origin.util import BASES, MUTATION_DIRECTIONS
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"

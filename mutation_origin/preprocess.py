@@ -1,9 +1,9 @@
 import pandas
 import numpy
-from morigin.feature import (feature_selector, seq_feature_labels_upto,
-                             get_mutation_direction_labels)
-from morigin.encoder import transformed, onehot, transform_response
-from morigin.util import valid_response_values
+from mutation_origin.feature import (feature_selector, seq_feature_labels_upto,
+                                     get_mutation_direction_labels)
+from mutation_origin.encoder import transformed, onehot, transform_response
+from mutation_origin.util import valid_response_values
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"

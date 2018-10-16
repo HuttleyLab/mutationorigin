@@ -1,4 +1,4 @@
-"""command line interface for morigin"""
+"""command line interface for mutation_origin"""
 import os
 import time
 import pickle
@@ -7,17 +7,20 @@ import pandas
 from numpy.random import seed as np_seed
 from scitrack import CachingLogger
 from sklearn.model_selection import train_test_split
-from morigin.opt import (_seed, _feature_dim, _enu_path,
-                         _germline_path, _ouput_path, _flank_size,
-                         _train_size, _test_size, _enu_ratio,
-                         _numreps, _label_col, _proximal, _usegc,
-                         _training_path, _c_values, _penalty_options,
-                         _n_jobs, _classifier_path, _data_path,
-                         _predictions_path, _alpha_options)
-from morigin.preprocess import data_to_numeric
-from morigin.encoder import get_scaler, inverse_transform_response
-from morigin.classify import (logistic_regression, one_class_svm,
-                              predict_origin, naive_bayes)
+from sklearn.metrics import (classification_report, confusion_matrix,
+                             roc_auc_score)
+
+from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
+                                 _germline_path, _ouput_path, _flank_size,
+                                 _train_size, _test_size, _enu_ratio,
+                                 _numreps, _label_col, _proximal, _usegc,
+                                 _training_path, _c_values, _penalty_options,
+                                 _n_jobs, _classifier_path, _data_path,
+                                 _predictions_path, _alpha_options)
+from mutation_origin.preprocess import data_to_numeric
+from mutation_origin.encoder import get_scaler, inverse_transform_response
+from mutation_origin.classify import (logistic_regression, one_class_svm,
+                                      predict_origin, naive_bayes)
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -34,7 +37,7 @@ LOGGER = CachingLogger()
 
 @click.group()
 def main():
-    """morigin -- for building and applying classifiers of mutation origin"""
+    """mutori -- for building and applying classifiers of mutation origin"""
     pass
 
 
@@ -295,7 +298,7 @@ def predict(classifier_path, data_path, ouput_path):
     predictions, scores = predict_origin(classifier, feat)
     predictions = inverse_transform_response(predictions)
     df = pandas.DataFrame({'varid': ids,
-                           'predicted origin': predictions,
+                           'predicted': predictions,
                            'scores': scores})
     outpath = os.path.join(ouput_path, "classified.tsv.gz")
     df.to_csv(outpath, index=False, header=True, sep='\t', compression='gzip')
@@ -312,39 +315,19 @@ def predict(classifier_path, data_path, ouput_path):
 @_predictions_path
 def performance(training_path, predictions_path):
     """predict labels for data"""
+    print(training_path, predictions_path)
+    if not (training_path or predictions_path):
+        click.secho("Need data sets!", fg="red")
+        exit()
+
     LOGGER.log_args()
-    with open(classifier_path, 'rb') as clf:
-        classifier = pickle.load(clf)
-
-    try:
-        feature_params = classifier["feature_params"]
-        scaler = classifier.get('scaler', None)
-        classifier = classifier["classifier"]
-    except KeyError:
-        raise ValueError("pickle formatted file does not "
-                         "contain classifier")
-
-    os.makedirs(ouput_path, exist_ok=True)
-    logfile_path = os.path.join(ouput_path, "logs/training.log")
-    LOGGER.log_file_path = logfile_path
-    LOGGER.input_file(classifier_path)
-    LOGGER.input_file(data_path)
-
-    start_time = time.time()
-    ids, resp, feat, n_dims, names = data_to_numeric(data_path,
-                                                     **feature_params)
-    if scaler:
-        feat = scaler.transform(feat)
-    predictions, scores = predict_origin(classifier, feat)
-    df = pandas.DataFrame({'varid': ids,
-                           'predictions': predictions,
-                           'scores': scores})
-    outpath = os.path.join(ouput_path, "classified.tsv.gz")
-    df.to_csv(outpath, index=False, header=True, sep='\t', compression='gzip')
-    LOGGER.output_file(outpath)
-    duration = time.time() - start_time
-    LOGGER.log_message("%.2f" % (duration / 60.),
-                       label="run duration (minutes)")
+    orig = pandas.read_csv(training_path, sep="\t")
+    orig = orig[['varid', 'response']]
+    orig.set_index('varid', inplace=True)
+    predicted = pandas.read_csv(predictions_path, sep="\t")
+    predicted.set_index('varid', inplace=True)
+    new = orig.join(predicted)
+    print(new)
 
 
 if __name__ == "__main__":

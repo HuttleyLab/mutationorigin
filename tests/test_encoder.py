@@ -1,10 +1,10 @@
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from cogent3.util.unit_test import TestCase, main
-from morigin.encoder import (transformed, onehot,
+from mutation_origin.encoder import (transformed, onehot,
                              transform_response,
                              inverse_transform_response)
-from morigin.feature import (get_mutation_direction_labels,
+from mutation_origin.feature import (get_mutation_direction_labels,
                              seq_feature_labels_upto,
                              feature_indices_upto,
                              seq_2_features)
