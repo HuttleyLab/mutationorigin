@@ -12,7 +12,7 @@ Inside a `conda` environment, run pip on the downloaded zip file.
 
 Installation creates a `mutori` command line script. Command line help shows
 
-```bash
+```
  $ mutori --help
 Usage: mutori [OPTIONS] COMMAND [ARGS]...
 
