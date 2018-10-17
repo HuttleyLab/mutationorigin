@@ -21,6 +21,7 @@ from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import get_scaler, inverse_transform_response
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
+from mutation_origin.util import dump_json, load_predictions
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -332,10 +333,30 @@ def performance(training_path, predictions_path, output_path):
     orig = pandas.read_csv(training_path, sep="\t")
     orig = orig[['varid', 'response']]
     orig.set_index('varid', inplace=True)
-    predicted = pandas.read_csv(predictions_path, sep="\t")
+    predicted, feature_params = load_predictions(predictions_path)
     predicted.set_index('varid', inplace=True)
     new = orig.join(predicted)
-    print(new)
+
+    response_labels = inverse_transform_response([-1, 1])
+    expect = transform_response(new['response'])
+    predict = transform_response(new['predicted'])
+    pr, re, fs, sup = precision_recall_fscore_support(expect,
+                                                      predict)
+    result = {}
+    result['classification_report'] = {'precision': pr.tolist(),
+                                       'recall': re.tolist(),
+                                       'f-score': fs.tolist(),
+                                       'labels': response_labels,
+                                       'support': sup.tolist()}
+    cf_matrix = pandas.DataFrame(confusion_matrix(expect, predict),
+                                 index=response_labels,
+                                 columns=response_labels)
+    cf_matrix = cf_matrix.rename_axis('actual / predicted', axis=1)
+    result["confusion_matrix"] = cf_matrix.to_dict(orient='list')
+    result["au_roc"] = roc_auc_score(expect, predict)
+    result["feature_params"] = feature_params
+    outpath = os.path.join(output_path, "performance.json.gz")
+    dump_json(outpath, result)
 
 
 if __name__ == "__main__":
