@@ -314,7 +314,7 @@ def predict(classifier_path, data_path, ouput_path):
 @_training_path
 @_predictions_path
 def performance(training_path, predictions_path):
-    """predict labels for data"""
+    """produce measures of classifier performance"""
     print(training_path, predictions_path)
     if not (training_path or predictions_path):
         click.secho("Need data sets!", fg="red")
