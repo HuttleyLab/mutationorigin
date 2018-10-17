@@ -86,15 +86,17 @@ def sample_data(enu_path, germline_path, output_path, seed,
     for rep in range(numreps):
         test_outpath = os.path.join(output_path, f"test-{rep}.tsv.gz")
         train_outpath = os.path.join(output_path, f"train-{rep}.tsv.gz")
-        enu_training, enu_testing = train_test_split(enu,
-                                                     test_size=enu_test_size,
-                                                     train_size=train_size // 2,
-                                                     random_state=seed)
+        enu_training, enu_testing = train_test_split(
+            enu,
+            test_size=enu_test_size,
+            train_size=train_size // 2,
+            random_state=seed)
 
-        germ_training, germ_testing = train_test_split(germline,
-                                                       test_size=germ_test_size,
-                                                       train_size=train_size // 2,
-                                                       random_state=seed)
+        germ_training, germ_testing = train_test_split(
+            germline,
+            test_size=germ_test_size,
+            train_size=train_size // 2,
+            random_state=seed)
         if any(map(lambda x: x.shape[0] == 0,
                    [enu_training, enu_testing, germ_training, germ_testing])):
             raise RuntimeError("screw up in creating test/train set")
@@ -146,7 +148,8 @@ def lr_train(training_path, output_path, label_col, seed,
     start_time = time.time()
     _, resp, feat, n_dims, names = data_to_numeric(training_path,
                                                    label_col, flank_size,
-                                                   feature_dim, proximal, usegc)
+                                                   feature_dim, proximal,
+                                                   usegc)
 
     if usegc:
         # we need to scale the data
@@ -158,7 +161,8 @@ def lr_train(training_path, output_path, label_col, seed,
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
-                                    flank_size=flank_size, proximal=proximal, usegc=usegc)
+                                    flank_size=flank_size, proximal=proximal,
+                                    usegc=usegc)
     if usegc:
         result['scaler'] = scaler
 
