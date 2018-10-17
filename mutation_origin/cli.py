@@ -365,8 +365,10 @@ def predict(classifier_path, data_path, output_path, overwrite):
 @_training_path
 @_predictions_path
 @_output_path
+@_label_col
 @_overwrite
-def performance(training_path, predictions_path, output_path, overwrite):
+def performance(training_path, predictions_path, output_path, label_col,
+                overwrite):
     """produce measures of classifier performance"""
     LOGGER.log_args()
     if not (training_path or predictions_path):
@@ -389,7 +391,7 @@ def performance(training_path, predictions_path, output_path, overwrite):
     LOGGER.input_file(predictions_path)
 
     orig = pandas.read_csv(training_path, sep="\t")
-    orig = orig[['varid', 'response']]
+    orig = orig[['varid', label_col]]
     orig.set_index('varid', inplace=True)
     predicted, feature_params = load_predictions(predictions_path)
     predicted.set_index('varid', inplace=True)
