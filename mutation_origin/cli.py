@@ -321,7 +321,9 @@ def predict(classifier_path, data_path, output_path, overwrite):
                          "contain classifier")
 
     class_label = get_classifier_label(classifier)
-    basename = get_basename(classifier_path)
+    basename_class = get_basename(classifier_path)
+    basename_data = get_basename(data_path)
+    basename = f"{basename_class}-{basename_data}"
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-predict-{class_label}.log")
@@ -371,7 +373,9 @@ def performance(training_path, predictions_path, output_path, overwrite):
         click.secho("Need data sets!", fg="red")
         exit()
 
-    basename = get_basename(training_path)
+    basename_train = get_basename(training_path)
+    basename_pred = get_basename(predictions_path)
+    basename = f"{basename_train}-{basename_pred}"
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-performance.log")
     if os.path.exists(logfile_path) and not overwrite:
