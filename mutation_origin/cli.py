@@ -16,7 +16,8 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _numreps, _label_col, _proximal, _usegc,
                                  _training_path, _c_values, _penalty_options,
                                  _n_jobs, _classifier_path, _data_path,
-                                 _predictions_path, _alpha_options)
+                                 _predictions_path, _alpha_options,
+                                 _overwrite)
 from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import (
     get_scaler, inverse_transform_response, transform_response)
@@ -53,9 +54,10 @@ def main():
 @_test_size
 @_enu_ratio
 @_numreps
+@_overwrite
 def sample_data(enu_path, germline_path, output_path, seed,
                 train_size, test_size,
-                enu_ratio, numreps):
+                enu_ratio, numreps, overwrite):
     """creates train/test sample data"""
     if seed is None:
         seed = int(time.time())
@@ -63,6 +65,11 @@ def sample_data(enu_path, germline_path, output_path, seed,
     start_time = time.time()
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path, "logs/data_sampling.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
+
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(enu_path)
     LOGGER.input_file(germline_path)
@@ -131,9 +138,10 @@ def sample_data(enu_path, germline_path, output_path, seed,
 @_c_values
 @_penalty_options
 @_n_jobs
+@_overwrite
 def lr_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
-             usegc, c_values, penalty_options, n_jobs):
+             usegc, c_values, penalty_options, n_jobs, overwrite):
     """logistic regression training, validation, dumps optimal model"""
     if not seed:
         seed = int(time.time())
@@ -145,6 +153,10 @@ def lr_train(training_path, output_path, label_col, seed,
     basename = get_basename(training_path)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-lr.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -189,9 +201,10 @@ def lr_train(training_path, output_path, label_col, seed,
 @_usegc
 @_alpha_options
 @_n_jobs
+@_overwrite
 def nb_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
-             usegc, alpha_options, n_jobs):
+             usegc, alpha_options, n_jobs, overwrite):
     """Naive Bayes training, validation, dumps optimal model"""
     if not seed:
         seed = int(time.time())
@@ -203,6 +216,10 @@ def nb_train(training_path, output_path, label_col, seed,
     basename = get_basename(training_path)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-nb.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -243,8 +260,9 @@ def nb_train(training_path, output_path, label_col, seed,
 @_flank_size
 @_feature_dim
 @_proximal
+@_overwrite
 def ocs_train(germline_path, output_path, label_col, seed,
-              flank_size, feature_dim, proximal):
+              flank_size, feature_dim, proximal, overwrite):
     """one-class svm training for outlier detection"""
     if seed is None:
         seed = int(time.time())
@@ -255,6 +273,11 @@ def ocs_train(germline_path, output_path, label_col, seed,
     basename = get_basename(germline_path)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
+
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(germline_path)
 
@@ -283,7 +306,8 @@ def ocs_train(germline_path, output_path, label_col, seed,
 @_classifier_path
 @_data_path
 @_output_path
-def predict(classifier_path, data_path, output_path):
+@_overwrite
+def predict(classifier_path, data_path, output_path, overwrite):
     """predict labels for data"""
     LOGGER.log_args()
     with open(classifier_path, 'rb') as clf:
@@ -301,6 +325,11 @@ def predict(classifier_path, data_path, output_path):
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-predict-{class_label}.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
+
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
     LOGGER.input_file(data_path)
@@ -334,7 +363,8 @@ def predict(classifier_path, data_path, output_path):
 @_training_path
 @_predictions_path
 @_output_path
-def performance(training_path, predictions_path, output_path):
+@_overwrite
+def performance(training_path, predictions_path, output_path, overwrite):
     """produce measures of classifier performance"""
     LOGGER.log_args()
     if not (training_path or predictions_path):
@@ -344,6 +374,11 @@ def performance(training_path, predictions_path, output_path):
     basename = get_basename(training_path)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-performance.log")
+    if os.path.exists(logfile_path) and not overwrite:
+        click.secho("Exists: {logfile_path}! use overwrite to force.",
+                    fg='red')
+        click.exit(-1)
+
     LOGGER.log_file_path = logfile_path
 
     LOGGER.input_file(training_path)

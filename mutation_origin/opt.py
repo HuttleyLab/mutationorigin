@@ -40,7 +40,7 @@ _germline_path = click.option('-g', '--germline_path', required=True,
                               help='file path for tab delimited germline'
                               ' mutation data.')
 _output_path = click.option('-o', '--output_path', required=True,
-                           help='Path to write output.')
+                            help='Path to write output.')
 _flank_size = click.option('-f', '--flank_size', type=int, required=True,
                            help='flank size considered when query the'
                            ' data file')
@@ -89,3 +89,6 @@ _classifier_path = click.option('-cp', '--classifier_path',
 _predictions_path = click.option('-pp', '--predictions_path',
                                  type=click.Path(exists=True),
                                  help="path to output from predict")
+_overwrite = click.option('-O', '--overwrite',
+                          is_flag=True,
+                          help="force overwrite of existing files")
