@@ -39,7 +39,7 @@ _germline_path = click.option('-g', '--germline_path', required=True,
                               type=click.Path(exists=True),
                               help='file path for tab delimited germline'
                               ' mutation data.')
-_ouput_path = click.option('-o', '--ouput_path', required=True,
+_output_path = click.option('-o', '--output_path', required=True,
                            help='Path to write output.')
 _flank_size = click.option('-f', '--flank_size', type=int, required=True,
                            help='flank size considered when query the'

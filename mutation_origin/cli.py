@@ -11,7 +11,7 @@ from sklearn.metrics import (classification_report, confusion_matrix,
                              roc_auc_score)
 
 from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
-                                 _germline_path, _ouput_path, _flank_size,
+                                 _germline_path, _output_path, _flank_size,
                                  _train_size, _test_size, _enu_ratio,
                                  _numreps, _label_col, _proximal, _usegc,
                                  _training_path, _c_values, _penalty_options,
@@ -45,12 +45,12 @@ def main():
 @_seed
 @_enu_path
 @_germline_path
-@_ouput_path
+@_output_path
 @_train_size
 @_test_size
 @_enu_ratio
 @_numreps
-def sample_data(enu_path, germline_path, ouput_path, seed,
+def sample_data(enu_path, germline_path, output_path, seed,
                 train_size, test_size,
                 enu_ratio, numreps):
     """creates train/test sample data"""
@@ -58,8 +58,8 @@ def sample_data(enu_path, germline_path, ouput_path, seed,
         seed = int(time.time())
     LOGGER.log_args()
     start_time = time.time()
-    os.makedirs(ouput_path, exist_ok=True)
-    logfile_path = os.path.join(ouput_path, "logs/data_sampling.log")
+    os.makedirs(output_path, exist_ok=True)
+    logfile_path = os.path.join(output_path, "logs/data_sampling.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(enu_path)
     LOGGER.input_file(germline_path)
@@ -82,8 +82,8 @@ def sample_data(enu_path, germline_path, ouput_path, seed,
         raise ValueError("chosen test size/enu ratio not possible")
 
     for rep in range(numreps):
-        test_outpath = os.path.join(ouput_path, f"test-{rep}.tsv.gz")
-        train_outpath = os.path.join(ouput_path, f"train-{rep}.tsv.gz")
+        test_outpath = os.path.join(output_path, f"test-{rep}.tsv.gz")
+        train_outpath = os.path.join(output_path, f"train-{rep}.tsv.gz")
         enu_training, enu_testing = train_test_split(enu,
                                                      test_size=enu_test_size,
                                                      train_size=train_size // 2,
@@ -116,7 +116,7 @@ def sample_data(enu_path, germline_path, ouput_path, seed,
 
 @main.command()
 @_training_path
-@_ouput_path
+@_output_path
 @_label_col
 @_seed
 @_flank_size
@@ -126,7 +126,7 @@ def sample_data(enu_path, germline_path, ouput_path, seed,
 @_c_values
 @_penalty_options
 @_n_jobs
-def lr_train(training_path, ouput_path, label_col, seed,
+def lr_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
              usegc, c_values, penalty_options, n_jobs):
     """logistic regression training, validation, dumps optimal model"""
@@ -135,9 +135,9 @@ def lr_train(training_path, ouput_path, label_col, seed,
 
     np_seed(seed)
     LOGGER.log_args()
-    os.makedirs(ouput_path, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(ouput_path, "logs/training.log")
+    logfile_path = os.path.join(output_path, "logs/training.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -152,7 +152,7 @@ def lr_train(training_path, ouput_path, label_col, seed,
         feat = scaler.transform(feat)
     classifier = logistic_regression(feat, resp, seed, c_values,
                                      penalty_options.split(","), n_jobs)
-    outpath = os.path.join(ouput_path, "logreg_classifier.pkl")
+    outpath = os.path.join(output_path, "logreg_classifier.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -171,7 +171,7 @@ def lr_train(training_path, ouput_path, label_col, seed,
 
 @main.command()
 @_training_path
-@_ouput_path
+@_output_path
 @_label_col
 @_seed
 @_flank_size
@@ -180,7 +180,7 @@ def lr_train(training_path, ouput_path, label_col, seed,
 @_usegc
 @_alpha_options
 @_n_jobs
-def nb_train(training_path, ouput_path, label_col, seed,
+def nb_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
              usegc, alpha_options, n_jobs):
     """Naive Bayes training, validation, dumps optimal model"""
@@ -189,9 +189,9 @@ def nb_train(training_path, ouput_path, label_col, seed,
 
     np_seed(seed)
     LOGGER.log_args()
-    os.makedirs(ouput_path, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(ouput_path, "logs/training.log")
+    logfile_path = os.path.join(output_path, "logs/training.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -206,7 +206,7 @@ def nb_train(training_path, ouput_path, label_col, seed,
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
     classifier = naive_bayes(feat, resp, seed, alpha_options, n_jobs)
-    outpath = os.path.join(ouput_path, "naive_bayes_classifier.pkl")
+    outpath = os.path.join(output_path, "naive_bayes_classifier.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -226,22 +226,22 @@ def nb_train(training_path, ouput_path, label_col, seed,
 
 @main.command()
 @_germline_path
-@_ouput_path
+@_output_path
 @_label_col
 @_seed
 @_flank_size
 @_feature_dim
 @_proximal
-def ocs_train(germline_path, ouput_path, label_col, seed,
+def ocs_train(germline_path, output_path, label_col, seed,
               flank_size, feature_dim, proximal):
     """one-class svm training for outlier detection"""
     if seed is None:
         seed = int(time.time())
     LOGGER.log_args()
     start_time = time.time()
-    os.makedirs(ouput_path, exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(ouput_path, "logs/training.log")
+    logfile_path = os.path.join(output_path, "logs/training.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(germline_path)
 
@@ -252,7 +252,7 @@ def ocs_train(germline_path, ouput_path, label_col, seed,
                                                 one_class='g')
 
     classifier = one_class_svm(feat, seed)
-    outpath = os.path.join(ouput_path, "oneclass_svm_classifier.pkl")
+    outpath = os.path.join(output_path, "oneclass_svm_classifier.pkl")
     result = dict(classifier=classifier)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal)
@@ -269,8 +269,8 @@ def ocs_train(germline_path, ouput_path, label_col, seed,
 @main.command()
 @_classifier_path
 @_data_path
-@_ouput_path
-def predict(classifier_path, data_path, ouput_path):
+@_output_path
+def predict(classifier_path, data_path, output_path):
     """predict labels for data"""
     LOGGER.log_args()
     with open(classifier_path, 'rb') as clf:
@@ -284,8 +284,8 @@ def predict(classifier_path, data_path, ouput_path):
         raise ValueError("pickle formatted file does not "
                          "contain classifier")
 
-    os.makedirs(ouput_path, exist_ok=True)
-    logfile_path = os.path.join(ouput_path, "logs/training.log")
+    os.makedirs(output_path, exist_ok=True)
+    logfile_path = os.path.join(output_path, "logs/training.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
     LOGGER.input_file(data_path)
@@ -297,11 +297,13 @@ def predict(classifier_path, data_path, ouput_path):
         feat = scaler.transform(feat)
     predictions, scores = predict_origin(classifier, feat)
     predictions = inverse_transform_response(predictions)
-    df = pandas.DataFrame({'varid': ids,
-                           'predicted': predictions,
-                           'scores': scores})
-    outpath = os.path.join(ouput_path, "classified.tsv.gz")
-    df.to_csv(outpath, index=False, header=True, sep='\t', compression='gzip')
+    result = {}
+    result['predictions'] = {'varid': ids,
+                             'predicted': predictions,
+                             'scores': scores.tolist()}
+    result['feature_params'] = feature_params
+    outpath = os.path.join(output_path, "classified.json.gz")
+    dump_json(outpath, result)
     LOGGER.output_file(outpath)
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
@@ -313,14 +315,20 @@ def predict(classifier_path, data_path, ouput_path):
 @main.command()
 @_training_path
 @_predictions_path
-def performance(training_path, predictions_path):
+@_output_path
+def performance(training_path, predictions_path, output_path):
     """produce measures of classifier performance"""
     print(training_path, predictions_path)
     if not (training_path or predictions_path):
         click.secho("Need data sets!", fg="red")
         exit()
 
-    LOGGER.log_args()
+    logfile_path = os.path.join(output_path, "logs/training.log")
+    LOGGER.log_file_path = logfile_path
+
+    LOGGER.input_file(training_path)
+    LOGGER.input_file(predictions_path)
+
     orig = pandas.read_csv(training_path, sep="\t")
     orig = orig[['varid', 'response']]
     orig.set_index('varid', inplace=True)
