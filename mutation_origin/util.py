@@ -1,6 +1,7 @@
+import os
 import json
 import pandas
-from cogent3.util.misc import open_
+from cogent3.util.misc import open_, get_format_suffixes
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -36,3 +37,25 @@ def load_predictions(infile_path):
     params = data["feature_params"]
     df = pandas.DataFrame(data["predictions"])
     return df, params
+
+
+def get_basename(path):
+    """returns a file basename without the suffixes"""
+    bn = os.path.basename(path)
+    suffix, cmp_suffix = get_format_suffixes(bn)
+    rindex = bn.rfind(f".{suffix}")
+    return bn[:rindex]
+
+
+def get_classifier_label(classifier):
+    """returns string label of classifier"""
+    name = classifier.__class__.__name__.lower()
+    if "logistic" in name:
+        label = 'lr'
+    elif 'nb' in name:
+        label = 'nb'
+    elif 'svm' in name:
+        label = 'ocs'
+    else:
+        raise ValueError("Unknown classifier type {name}")
+    return label

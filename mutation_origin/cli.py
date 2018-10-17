@@ -22,7 +22,8 @@ from mutation_origin.encoder import (
     get_scaler, inverse_transform_response, transform_response)
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
-from mutation_origin.util import dump_json, load_predictions
+from mutation_origin.util import (dump_json, load_predictions, get_basename,
+                                  get_classifier_label)
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -141,7 +142,9 @@ def lr_train(training_path, output_path, label_col, seed,
     LOGGER.log_args()
     os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(output_path, "logs/training.log")
+    basename = get_basename(training_path)
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-training-lr.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -157,7 +160,7 @@ def lr_train(training_path, output_path, label_col, seed,
         feat = scaler.transform(feat)
     classifier = logistic_regression(feat, resp, seed, c_values,
                                      penalty_options.split(","), n_jobs)
-    outpath = os.path.join(output_path, "logreg_classifier.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -197,7 +200,9 @@ def nb_train(training_path, output_path, label_col, seed,
     LOGGER.log_args()
     os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(output_path, "logs/training.log")
+    basename = get_basename(training_path)
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-training-nb.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -212,7 +217,7 @@ def nb_train(training_path, output_path, label_col, seed,
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
     classifier = naive_bayes(feat, resp, seed, alpha_options, n_jobs)
-    outpath = os.path.join(output_path, "naive_bayes_classifier.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-nb.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -247,7 +252,9 @@ def ocs_train(germline_path, output_path, label_col, seed,
     start_time = time.time()
     os.makedirs(output_path, exist_ok=True)
 
-    logfile_path = os.path.join(output_path, "logs/training.log")
+    basename = get_basename(germline_path)
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-training-ocs.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(germline_path)
 
@@ -258,7 +265,7 @@ def ocs_train(germline_path, output_path, label_col, seed,
                                                 one_class='g')
 
     classifier = one_class_svm(feat, seed)
-    outpath = os.path.join(output_path, "oneclass_svm_classifier.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl")
     result = dict(classifier=classifier)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal)
@@ -281,7 +288,6 @@ def predict(classifier_path, data_path, output_path):
     LOGGER.log_args()
     with open(classifier_path, 'rb') as clf:
         classifier = pickle.load(clf)
-
     try:
         feature_params = classifier["feature_params"]
         scaler = classifier.get('scaler', None)
@@ -290,8 +296,11 @@ def predict(classifier_path, data_path, output_path):
         raise ValueError("pickle formatted file does not "
                          "contain classifier")
 
+    class_label = get_classifier_label(classifier)
+    basename = get_basename(classifier_path)
     os.makedirs(output_path, exist_ok=True)
-    logfile_path = os.path.join(output_path, "logs/training.log")
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-predict-{class_label}.log")
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
     LOGGER.input_file(data_path)
@@ -308,7 +317,10 @@ def predict(classifier_path, data_path, output_path):
                              'predicted': predictions,
                              'scores': scores.tolist()}
     result['feature_params'] = feature_params
-    outpath = os.path.join(output_path, "classified.json.gz")
+    result['classifier_label'] = class_label
+    outpath = os.path.join(
+        output_path,
+        f"{basename}-predicted-{class_label}.json.gz")
     dump_json(outpath, result)
     LOGGER.output_file(outpath)
     duration = time.time() - start_time
@@ -329,7 +341,9 @@ def performance(training_path, predictions_path, output_path):
         click.secho("Need data sets!", fg="red")
         exit()
 
-    logfile_path = os.path.join(output_path, "logs/training.log")
+    basename = get_basename(training_path)
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-performance.log")
     LOGGER.log_file_path = logfile_path
 
     LOGGER.input_file(training_path)
