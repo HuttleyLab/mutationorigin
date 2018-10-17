@@ -7,8 +7,8 @@ import pandas
 from numpy.random import seed as np_seed
 from scitrack import CachingLogger
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (classification_report, confusion_matrix,
-                             roc_auc_score)
+from sklearn.metrics import (confusion_matrix,
+                             roc_auc_score, precision_recall_fscore_support)
 
 from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _germline_path, _output_path, _flank_size,
@@ -18,7 +18,8 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _n_jobs, _classifier_path, _data_path,
                                  _predictions_path, _alpha_options)
 from mutation_origin.preprocess import data_to_numeric
-from mutation_origin.encoder import get_scaler, inverse_transform_response
+from mutation_origin.encoder import (
+    get_scaler, inverse_transform_response, transform_response)
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
 from mutation_origin.util import dump_json, load_predictions
@@ -319,7 +320,7 @@ def predict(classifier_path, data_path, output_path):
 @_output_path
 def performance(training_path, predictions_path, output_path):
     """produce measures of classifier performance"""
-    print(training_path, predictions_path)
+    LOGGER.log_args()
     if not (training_path or predictions_path):
         click.secho("Need data sets!", fg="red")
         exit()
