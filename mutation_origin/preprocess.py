@@ -45,7 +45,6 @@ def data_to_numeric(path, label_col=None, flank_size=None,
                                       direction_transform=le)
     # now one-hot encode
     feat = onehot(feat, n_dims)
-
     # if usegc, extract that column and insert into feature
     if usegc:
         gc_col = "GC" if "GC" in data else "gc"

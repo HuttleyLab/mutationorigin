@@ -66,9 +66,9 @@ def sample_data(enu_path, germline_path, output_path, seed,
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path, "logs/data_sampling.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(enu_path)
@@ -154,9 +154,9 @@ def lr_train(training_path, output_path, label_col, seed,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-lr.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -217,9 +217,9 @@ def nb_train(training_path, output_path, label_col, seed,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-nb.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -274,9 +274,9 @@ def ocs_train(germline_path, output_path, label_col, seed,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(germline_path)
@@ -326,9 +326,9 @@ def predict(classifier_path, data_path, output_path, overwrite):
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-predict-{class_label}.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
@@ -375,9 +375,9 @@ def performance(training_path, predictions_path, output_path, overwrite):
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-performance.log")
     if os.path.exists(logfile_path) and not overwrite:
-        click.secho("Exists: {logfile_path}! use overwrite to force.",
+        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        click.exit(-1)
+        exit(-1)
 
     LOGGER.log_file_path = logfile_path
 
