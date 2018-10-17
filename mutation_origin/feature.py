@@ -120,8 +120,12 @@ def feature_selector(data, label_col, flank_size, feature_dim,
     flank5 = data['flank5'].tolist()
     flank3 = data['flank3'].tolist()
     for i in range(len(flank5)):
-        seq = flank5[i][-flank_size:] + flank3[i][:flank_size]
-        features.append([direction[i]] + seq_2_features(seq, indices))
+        if flank_size:
+            seq = flank5[i][-flank_size:] + flank3[i][:flank_size]
+            feat = seq_2_features(seq, indices)
+        else:
+            feat = []
+        features.append([direction[i]] + feat)
 
     # `features` consists of the mutation direction and conversion of the
     # sequence into component features
