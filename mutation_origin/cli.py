@@ -151,12 +151,14 @@ def lr_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
+    outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl")
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "use overwrite to force.",
+                    fg='green')
+        exit(0)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-lr.log")
-    if os.path.exists(logfile_path) and not overwrite:
-        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
-                    fg='red')
-        exit(-1)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -172,7 +174,6 @@ def lr_train(training_path, output_path, label_col, seed,
         feat = scaler.transform(feat)
     classifier = logistic_regression(feat, resp, seed, c_values,
                                      penalty_options.split(","), n_jobs)
-    outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -214,12 +215,14 @@ def nb_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
+    outpath = os.path.join(output_path, f"{basename}-classifier-nb.pkl")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-nb.log")
-    if os.path.exists(logfile_path) and not overwrite:
-        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
-                    fg='red')
-        exit(-1)
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "use overwrite to force.",
+                    fg='green')
+        exit(0)
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -234,7 +237,6 @@ def nb_train(training_path, output_path, label_col, seed,
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
     classifier = naive_bayes(feat, resp, seed, alpha_options, n_jobs)
-    outpath = os.path.join(output_path, f"{basename}-classifier-nb.pkl")
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,
@@ -271,12 +273,14 @@ def ocs_train(germline_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(germline_path)
+    outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
-    if os.path.exists(logfile_path) and not overwrite:
-        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
-                    fg='red')
-        exit(-1)
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "use overwrite to force.",
+                    fg='green')
+        exit(0)
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(germline_path)
@@ -288,7 +292,6 @@ def ocs_train(germline_path, output_path, label_col, seed,
                                                 one_class='g')
 
     classifier = one_class_svm(feat, seed)
-    outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl")
     result = dict(classifier=classifier)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal)
@@ -324,13 +327,17 @@ def predict(classifier_path, data_path, output_path, overwrite):
     basename_class = get_basename(classifier_path)
     basename_data = get_basename(data_path)
     basename = f"{basename_class}-{basename_data}"
+    outpath = os.path.join(
+        output_path,
+        f"{basename}-predicted-{class_label}.json.gz")
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-predict-{class_label}.log")
-    if os.path.exists(logfile_path) and not overwrite:
-        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
-                    fg='red')
-        exit(-1)
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "use overwrite to force.",
+                    fg='green')
+        exit(0)
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
@@ -349,9 +356,6 @@ def predict(classifier_path, data_path, output_path, overwrite):
                              'scores': scores.tolist()}
     result['feature_params'] = feature_params
     result['classifier_label'] = class_label
-    outpath = os.path.join(
-        output_path,
-        f"{basename}-predicted-{class_label}.json.gz")
     dump_json(outpath, result)
     LOGGER.output_file(outpath)
     duration = time.time() - start_time
