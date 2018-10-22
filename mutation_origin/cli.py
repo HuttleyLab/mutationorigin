@@ -348,6 +348,10 @@ def predict(classifier_path, data_path, output_path, overwrite):
                                                      **feature_params)
     if scaler:
         feat = scaler.transform(feat)
+
+    # if NB, the score func name is different
+    if class_label == "nb":
+        classifier.decision_function = classifier.predict_proba
     predictions, scores = predict_origin(classifier, feat)
     predictions = inverse_transform_response(predictions)
     result = {}
@@ -422,6 +426,8 @@ def performance(training_path, predictions_path, output_path, label_col,
     outpath = os.path.join(output_path, "performance.json.gz")
     dump_json(outpath, result)
 
+
+# another subcommand -- choose_classifier (based on highest auroc)
 
 if __name__ == "__main__":
     main()
