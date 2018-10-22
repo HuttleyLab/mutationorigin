@@ -65,7 +65,7 @@ _label_col = click.option('-l', '--label_col', default='response',
 _training_path = click.option('-T', '--training_path',
                               type=click.Path(exists=True),
                               help='Input file containing training data.')
-_data_path = click.option('-D', '--data_path',
+_data_path = click.option('-dp', '--data_path',
                           type=click.Path(exists=True),
                           help='Input file containing training data.')
 _c_values = click.option('-C', '--c_values',
