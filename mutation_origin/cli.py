@@ -386,12 +386,16 @@ def performance(training_path, predictions_path, output_path, label_col,
     basename_train = get_basename(training_path)
     basename_pred = get_basename(predictions_path)
     basename = f"{basename_train}-{basename_pred}"
+    outpath = os.path.join(
+        output_path,
+        f"{basename}-performance.json.gz")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-performance.log")
-    if os.path.exists(logfile_path) and not overwrite:
-        click.secho(f"Exists: {logfile_path}! use overwrite to force.",
-                    fg='red')
-        exit(-1)
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "use overwrite to force.",
+                    fg='green')
+        exit(0)
 
     LOGGER.log_file_path = logfile_path
 
@@ -423,7 +427,6 @@ def performance(training_path, predictions_path, output_path, label_col,
     result["confusion_matrix"] = cf_matrix.to_dict(orient='list')
     result["au_roc"] = roc_auc_score(expect, predict)
     result["feature_params"] = feature_params
-    outpath = os.path.join(output_path, "performance.json.gz")
     dump_json(outpath, result)
 
 
