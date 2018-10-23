@@ -84,12 +84,18 @@ def sample_data(enu_path, germline_path, output_path, seed,
         germ_test_size = test_size // 2
     enu_test_size = test_size - germ_test_size
 
-    # TODO make sure these siezes are <= 50% of the inputs
     if (enu.shape[0] < enu_test_size or
             germline.shape[0] < germ_test_size):
         print(f"ENU data set size: {enu.shape[0]}")
         print(f"Germline data set size: {germline.shape[0]}")
         raise ValueError("chosen test size/enu ratio not possible")
+
+    if (enu.shape[0] // 2 < enu_test_size or
+            germline.shape[0] // 2 < germ_test_size):
+        print(f"ENU data set size: {enu.shape[0]}")
+        print(f"Germline data set size: {germline.shape[0]}")
+        raise ValueError("chosen test size/enu ratio not less than 50% "
+                         "of training data")
 
     for rep in range(numreps):
         test_outpath = os.path.join(output_path, f"test-{rep}.tsv.gz")
