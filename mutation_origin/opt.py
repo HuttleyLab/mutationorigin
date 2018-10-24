@@ -74,7 +74,7 @@ _c_values = click.option('-C', '--c_values',
                          help='C values choosed for '
                          'model, e.g. "0.1,1,10,100"')
 _penalty_options = click.option('-P', '--penalty_options',
-                                default='l1',
+                                default='l1,l2',
                                 help="penalty parameter choosed for model, "
                                 "e.g. 'l1','l2', or 'l1,l2'")
 _alpha_options = click.option('-a', '--alpha_options',
