@@ -76,13 +76,15 @@ def sample_data(enu_path, germline_path, output_path, seed,
 
     enu = pandas.read_csv(enu_path, sep="\t", header=0)
     germline = pandas.read_csv(germline_path, sep="\t", header=0)
-    if enu_ratio != 1:
+    if enu_ratio == 1:
+        germ_test_size = test_size // 2
+    else:
         # adjust the test sizes for ENU/germline
         # first convert both
         germ_test_size = test_size // enu_ratio
-    else:
-        germ_test_size = test_size // 2
+
     enu_test_size = test_size - germ_test_size
+    assert enu_test_size > 0
 
     if (enu.shape[0] < enu_test_size or
             germline.shape[0] < germ_test_size):
