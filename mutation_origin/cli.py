@@ -103,13 +103,13 @@ def sample_data(enu_path, germline_path, output_path, seed,
         enu_training, enu_testing = train_test_split(
             enu,
             test_size=enu_test_size,
-            train_size=train_size // 2,
+            train_size=train_size,
             random_state=seed)
 
         germ_training, germ_testing = train_test_split(
             germline,
             test_size=germ_test_size,
-            train_size=train_size // 2,
+            train_size=train_size,
             random_state=seed)
         if any(map(lambda x: x.shape[0] == 0,
                    [enu_training, enu_testing, germ_training, germ_testing])):
