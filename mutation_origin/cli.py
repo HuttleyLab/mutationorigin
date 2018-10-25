@@ -89,18 +89,15 @@ def sample_data(enu_path, germline_path, output_path, seed,
     enu_test_size = test_size - germ_test_size
     assert enu_test_size > 0
 
-    if (enu.shape[0] < enu_test_size or
-            germline.shape[0] < germ_test_size):
+    if (train_size + enu_test_size > enu.shape[0] or
+            train_size + germ_test_size > germline.shape[0]):
         print(f"ENU data set size: {enu.shape[0]}")
         print(f"Germline data set size: {germline.shape[0]}")
-        raise ValueError("chosen test size/enu ratio not possible")
-
-    if (enu.shape[0] // 2 < enu_test_size or
-            germline.shape[0] // 2 < germ_test_size):
-        print(f"ENU data set size: {enu.shape[0]}")
-        print(f"Germline data set size: {germline.shape[0]}")
-        raise ValueError("chosen test size/enu ratio not less than 50% "
-                         "of training data")
+        print(f"Train set size: {train_size}")
+        print(f"ENU test size: {enu_test_size}")
+        print(f"Germline test size: {germ_test_size}")
+        raise ValueError("sum of train size and test size exceeds"
+                         " training data size")
 
     for rep in range(numreps):
         test_outpath = os.path.join(output_path, f"test-{rep}.tsv.gz")
