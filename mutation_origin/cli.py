@@ -362,6 +362,13 @@ def predict(classifier_path, data_path, output_path, overwrite):
     if class_label == "nb":
         classifier.decision_function = classifier.predict_proba
     predictions, scores = predict_origin(classifier, feat)
+    if class_label == "nb":
+        # each `score' is the probability of belong to either class
+        # reduce to just the first class
+        scores = scores[:, 1]
+    elif class_label == 'ocs':
+        scores = scores[:, 0]
+
     predictions = inverse_transform_response(predictions)
     result = {}
     result['predictions'] = {'varid': ids,
