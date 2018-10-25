@@ -25,21 +25,21 @@ def _make_num_series(ctx, param, value):
     return value
 
 
-_seed = click.option('-S', '--seed', type=int, default=None,
+_seed = click.option('-s', '--seed', type=int, default=None,
                      help='Seed for random number generator.'
                      ' Defaults to system time.')
 _feature_dim = click.option('-d', '--feature_dim', type=click.IntRange(0, 21),
                             default=1,
                             help='Max dependent interaction order/dimension '
                             'considered when constructing position features.')
-_enu_path = click.option('-e', '--enu_path', required=True,
+_enu_path = click.option('-ep', '--enu_path', required=True,
                          type=click.Path(exists=True),
                          help='file path for tab delimited ENU mutation data.')
-_germline_path = click.option('-g', '--germline_path', required=True,
+_germline_path = click.option('-gp', '--germline_path', required=True,
                               type=click.Path(exists=True),
                               help='file path for tab delimited germline'
                               ' mutation data.')
-_output_path = click.option('-o', '--output_path', required=True,
+_output_path = click.option('-op', '--output_path', required=True,
                             help='Path to write output.')
 _flank_size = click.option('-f', '--flank_size', type=int, required=True,
                            help='flank size considered when query the'
@@ -62,7 +62,7 @@ _numreps = click.option('-n', '--numreps', required=True, type=int,
                         ' process for.')
 _label_col = click.option('-l', '--label_col', default='response',
                           help='Table column corresponding to response label.')
-_training_path = click.option('-T', '--training_path',
+_training_path = click.option('-tp', '--training_path',
                               type=click.Path(exists=True),
                               help='Input file containing training data.')
 _data_path = click.option('-dp', '--data_path',
