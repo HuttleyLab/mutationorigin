@@ -376,6 +376,7 @@ def predict(classifier_path, data_path, output_path, overwrite):
                              'scores': scores.tolist()}
     result['feature_params'] = feature_params
     result['classifier_label'] = class_label
+    result['classifier_path'] = classifier_path
     dump_json(outpath, result)
     LOGGER.output_file(outpath)
     duration = time.time() - start_time
@@ -409,7 +410,7 @@ def performance(training_path, predictions_path, output_path, label_col,
                                 f"logs/{basename}-performance.log")
     if os.path.exists(outpath) and not overwrite:
         click.secho(f"Skipping. {outpath} exists. "
-                    "use overwrite to force.",
+                    "Use overwrite to force.",
                     fg='green')
         exit(0)
 
@@ -418,10 +419,12 @@ def performance(training_path, predictions_path, output_path, label_col,
     LOGGER.input_file(training_path)
     LOGGER.input_file(predictions_path)
     orig = pandas.read_csv(training_path, sep="\t")
-    predicted, feature_params = load_predictions(predictions_path)
+    predicted, feature_params, classifier_path =\
+        load_predictions(predictions_path)
     result = measure_performance(orig, predicted,
                                  label_col)
     result["feature_params"] = feature_params
+    result["classifier_path"] = classifier_path
     dump_json(outpath, result)
 
 

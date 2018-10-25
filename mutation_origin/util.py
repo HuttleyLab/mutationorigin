@@ -29,14 +29,21 @@ def dump_json(path, data):
         json.dump(data, outfile)
 
 
-def load_predictions(infile_path):
-    """returns dataframe, params from  json format prediction data"""
-    with open_(infile_path) as infile:
+def load_json(path):
+    """loads raw data object from json file"""
+    with open_(path) as infile:
         data = json.load(infile)
+    return data
+
+
+def load_predictions(path):
+    """returns dataframe, params from  json format prediction data"""
+    data = load_json(path)
 
     params = data["feature_params"]
     df = pandas.DataFrame(data["predictions"])
-    return df, params
+    cpath = data.get("classifier_path", None)
+    return df, params, cpath
 
 
 def get_basename(path):
