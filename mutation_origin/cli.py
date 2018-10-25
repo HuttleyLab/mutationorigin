@@ -75,6 +75,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
 
     enu = pandas.read_csv(enu_path, sep="\t", header=0)
     germline = pandas.read_csv(germline_path, sep="\t", header=0)
+    train_size = train_size // 2
     if enu_ratio == 1:
         germ_test_size = test_size // 2
     else:
