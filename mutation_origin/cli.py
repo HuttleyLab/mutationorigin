@@ -61,6 +61,9 @@ def sample_data(enu_path, germline_path, output_path, seed,
     if seed is None:
         seed = int(time.time())
     LOGGER.log_args()
+
+    # set the random number seed
+    np_seed(seed)
     start_time = time.time()
     os.makedirs(output_path, exist_ok=True)
     logfile_path = os.path.join(output_path, "logs/data_sampling.log")
@@ -105,14 +108,12 @@ def sample_data(enu_path, germline_path, output_path, seed,
         enu_training, enu_testing = train_test_split(
             enu,
             test_size=enu_test_size,
-            train_size=train_size,
-            random_state=seed)
+            train_size=train_size)
 
         germ_training, germ_testing = train_test_split(
             germline,
             test_size=germ_test_size,
-            train_size=train_size,
-            random_state=seed)
+            train_size=train_size)
         if any(map(lambda x: x.shape[0] == 0,
                    [enu_training, enu_testing, germ_training, germ_testing])):
             raise RuntimeError("screw up in creating test/train set")
