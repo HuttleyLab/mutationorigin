@@ -7,8 +7,6 @@ import pandas
 from numpy.random import seed as np_seed
 from scitrack import CachingLogger
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import (confusion_matrix,
-                             roc_auc_score, precision_recall_fscore_support)
 
 from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _germline_path, _output_path, _flank_size,
@@ -19,12 +17,13 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite)
 from mutation_origin.preprocess import data_to_numeric
-from mutation_origin.encoder import (
-    get_scaler, inverse_transform_response, transform_response)
+from mutation_origin.encoder import get_scaler, inverse_transform_response
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
 from mutation_origin.util import (dump_json, load_predictions, get_basename,
                                   get_classifier_label)
+from mutation_origin.postprocess import measure_performance
+
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -409,31 +408,10 @@ def performance(training_path, predictions_path, output_path, label_col,
 
     LOGGER.input_file(training_path)
     LOGGER.input_file(predictions_path)
-
     orig = pandas.read_csv(training_path, sep="\t")
-    orig = orig[['varid', label_col]]
-    orig.set_index('varid', inplace=True)
     predicted, feature_params = load_predictions(predictions_path)
-    predicted.set_index('varid', inplace=True)
-    new = orig.join(predicted)
-
-    response_labels = inverse_transform_response([-1, 1])
-    expect = transform_response(new['response'])
-    predict = transform_response(new['predicted'])
-    pr, re, fs, sup = precision_recall_fscore_support(expect,
-                                                      predict)
-    result = {}
-    result['classification_report'] = {'precision': pr.tolist(),
-                                       'recall': re.tolist(),
-                                       'f-score': fs.tolist(),
-                                       'labels': response_labels,
-                                       'support': sup.tolist()}
-    cf_matrix = pandas.DataFrame(confusion_matrix(expect, predict),
-                                 index=response_labels,
-                                 columns=response_labels)
-    cf_matrix = cf_matrix.rename_axis('actual / predicted', axis=1)
-    result["confusion_matrix"] = cf_matrix.to_dict(orient='list')
-    result["au_roc"] = roc_auc_score(expect, predict)
+    result = measure_performance(orig, predicted,
+                                 label_col)
     result["feature_params"] = feature_params
     dump_json(outpath, result)
 
