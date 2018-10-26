@@ -22,10 +22,11 @@ Options:
   --help  Show this message and exit.
 
 Commands:
+  collect      collects all classifier performance stats and...
   lr_train     logistic regression training, validation,...
   nb_train     Naive Bayes training, validation, dumps...
   ocs_train    one-class svm training for outlier detection
-  performance  predict labels for data
+  performance  produce measures of classifier performance
   predict      predict labels for data
   sample_data  creates train/test sample data
 ```
