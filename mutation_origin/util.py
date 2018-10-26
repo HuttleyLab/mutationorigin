@@ -1,3 +1,5 @@
+import sys
+from subprocess import Popen, PIPE
 import os
 import json
 import pandas
@@ -16,6 +18,30 @@ __status__ = "Development"
 MUTATION_DIRECTIONS = ('AtoC', 'AtoG', 'AtoT', 'CtoA', 'CtoG', 'CtoT',
                        'GtoA', 'GtoC', 'GtoT', 'TtoA', 'TtoC', 'TtoG')
 BASES = tuple("ACGT")
+
+
+def exec_command(cmnd, stdout=PIPE, stderr=PIPE):
+    """executes shell command and returns stdout if completes exit code 0
+
+    Parameters
+    ----------
+
+    cmnd : str
+      shell command to be executed
+    stdout, stderr : streams
+      Default value (PIPE) intercepts process output, setting to None
+      blocks this."""
+    proc = Popen(cmnd, shell=True, stdout=stdout, stderr=stderr)
+    out, err = proc.communicate()
+    if proc.returncode != 0:
+        msg = err
+        sys.stderr.writelines("FAILED: %s\n%s" % (cmnd, msg))
+        sys.exit(proc.returncode)
+    if out is not None:
+        r = out.decode('utf8')
+    else:
+        r = None
+    return r
 
 
 def valid_response_values(data):
