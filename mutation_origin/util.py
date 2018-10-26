@@ -43,7 +43,8 @@ def load_predictions(path):
     params = data["feature_params"]
     df = pandas.DataFrame(data["predictions"])
     cpath = data.get("classifier_path", None)
-    return df, params, cpath
+    label = data.get("classifier_label", None)
+    return df, params, cpath, label
 
 
 def get_basename(path):

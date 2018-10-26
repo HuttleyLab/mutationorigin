@@ -416,12 +416,13 @@ def performance(training_path, predictions_path, output_path, label_col,
     LOGGER.input_file(training_path)
     LOGGER.input_file(predictions_path)
     orig = pandas.read_csv(training_path, sep="\t")
-    predicted, feature_params, classifier_path =\
+    predicted, feature_params, classifier_path, label =\
         load_predictions(predictions_path)
     result = measure_performance(orig, predicted,
                                  label_col)
     result["feature_params"] = feature_params
     result["classifier_path"] = classifier_path
+    result["classifier_label"] = label
     dump_json(outpath, result)
 
 
