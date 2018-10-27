@@ -301,7 +301,8 @@ def ocs_train(germline_path, output_path, label_col, seed,
     classifier = one_class_svm(feat, seed)
     result = dict(classifier=classifier)
     result['feature_params'] = dict(feature_dim=feature_dim,
-                                    flank_size=flank_size, proximal=proximal)
+                                    flank_size=flank_size, proximal=proximal,
+                                    usegc=False)  # key added for consistency
 
     with open(outpath, 'wb') as clf_file:
         pickle.dump(result, clf_file)
