@@ -92,3 +92,22 @@ _predictions_path = click.option('-pp', '--predictions_path',
 _overwrite = click.option('-O', '--overwrite',
                           is_flag=True,
                           help="force overwrite of existing files")
+_size_range = click.option("-sr", "--size_range",
+                           required=True,
+                           default="1,2,4,8,16",
+                           help="range of sizes (in thousands) of the "
+                           "training AND testing samples")
+_model_range = click.option("-mr", "--model_range",
+                            type=click.Choice(["upto1", "upto2",
+                                               "upto3", "FS"]),
+                            default="upto1",
+                            required=True,
+                            help="range of models")
+_classifier_paths = click.option("-cp", "--classifier_paths",
+                                 type=click.Path(),
+                                 required=True,
+                                 help="basedir containing pickled classifiers")
+_test_data_paths = click.option("-tp", "--test_data_paths",
+                                type=click.Path(),
+                                required=True,
+                                help="basedir containing data for testing")
