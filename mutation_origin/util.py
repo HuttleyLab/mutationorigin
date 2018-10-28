@@ -1,3 +1,4 @@
+import re
 import sys
 from subprocess import Popen, PIPE
 import os
@@ -15,6 +16,11 @@ __email__ = "Gavin.Huttley@anu.edu.au"
 __status__ = "Development"
 
 
+FILENAME_PATTERNS = {"sample_data": dict(train="train-*.tsv.gz",
+                                         test="test-*.tsv.gz"),
+                     "train": "*-classifier-*.pkl",
+                     "predict": "*-predicted-*.json.gz",
+                     "performance": "*-performance.json.gz"}
 MUTATION_DIRECTIONS = ('AtoC', 'AtoG', 'AtoT', 'CtoA', 'CtoG', 'CtoT',
                        'GtoA', 'GtoC', 'GtoT', 'TtoA', 'TtoC', 'TtoG')
 BASES = tuple("ACGT")
@@ -93,3 +99,61 @@ def get_classifier_label(classifier):
     else:
         raise ValueError("Unknown classifier type {name}")
     return label
+
+
+def dirname_from_features(features):
+    """generates directory names from a feature set"""
+    dirname = f"f{features['flank_size']}"
+    if features.get('feature_dim'):
+        dirname += f"d{features['feature_dim']}"
+    if features.get('proximal'):
+        dirname += 'p'
+    if features.get('usegc'):
+        dirname += 'GC'
+    return dirname
+
+
+def flank_dim_combinations(start_flank=0, get_dims=None):
+    """returns flank_size/dim combinations"""
+    combinations = []
+    for fz in range(start_flank, 4):
+        if fz == 0:
+            combinations.append(dict(flank_size=fz))
+            continue
+
+        if get_dims is None:
+            dims = range(1, 2 * fz)
+        else:
+            dims = get_dims(fz)
+
+        for dim in dims:
+            combinations.append(dict(flank_size=fz, feature_dim=dim))
+
+    return combinations
+
+
+_size = re.compile(r"(?<=/)\d+(?=k/)")
+
+
+def sample_size_from_path(path):
+    """returns component of path ijndicating sample size"""
+    size = int(_size.findall(path)[0]) * 1000
+    return size
+
+
+_rep = re.compile(r"(?<=-)\d+(?=[-.])")
+
+
+def data_rep_from_path(src, path):
+    """returns component of path indicating sample size"""
+    basename = os.path.basename(path)
+    rep = _rep.findall(basename)[0]
+    return rep
+
+
+_feats = re.compile(r"f\d+[d\d]*p*[GC]*")
+
+
+def feature_set_from_path(path):
+    features = _feats.findall(path)[0]
+    return features

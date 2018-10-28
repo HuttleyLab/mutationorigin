@@ -60,6 +60,7 @@ setup(
     # changing it to http://github.com/mtai/python-gearman/tarball/master#egg=gearman-2.0.0beta instead
     entry_points={
         'console_scripts': ['mutori=mutation_origin.cli:main',
+                            'mutori_batch=mutation_origin.batch:main'
                             ],
     }
 )

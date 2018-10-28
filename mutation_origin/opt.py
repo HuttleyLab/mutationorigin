@@ -67,7 +67,7 @@ _training_path = click.option('-tp', '--training_path',
                               help='Input file containing training data.')
 _data_path = click.option('-dp', '--data_path',
                           type=click.Path(exists=True),
-                          help='Input file containing training data.')
+                          help='Input file containing testing data.')
 _c_values = click.option('-C', '--c_values',
                          default='0.1,1,10,100',
                          callback=_make_num_series,
@@ -81,7 +81,7 @@ _alpha_options = click.option('-a', '--alpha_options',
                               default="0.01,0.1,1,2,3",
                               callback=_make_num_series,
                               help='Alpha values for model')
-_n_jobs = click.option('--n_jobs', type=int, default=1,
+_n_jobs = click.option('-N', '--n_jobs', type=int, default=1,
                        help="num parallel jobs via joblib")
 _classifier_path = click.option('-cp', '--classifier_path',
                                 type=click.Path(exists=True),
