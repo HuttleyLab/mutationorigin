@@ -387,20 +387,20 @@ def predict(classifier_path, data_path, output_path, overwrite):
 # def performance -> produces summary stats on trained classifiers
 # requires input data and the predicted results
 @main.command()
-@_training_path
+@_data_path
 @_predictions_path
 @_output_path
 @_label_col
 @_overwrite
-def performance(training_path, predictions_path, output_path, label_col,
+def performance(data_path, predictions_path, output_path, label_col,
                 overwrite):
     """produce measures of classifier performance"""
     LOGGER.log_args()
-    if not (training_path or predictions_path):
+    if not (data_path or predictions_path):
         click.secho("Need data sets!", fg="red")
         exit()
 
-    basename_train = get_basename(training_path)
+    basename_train = get_basename(data_path)
     basename_pred = get_basename(predictions_path)
     basename = f"{basename_train}-{basename_pred}"
     outpath = os.path.join(
@@ -416,9 +416,9 @@ def performance(training_path, predictions_path, output_path, label_col,
 
     LOGGER.log_file_path = logfile_path
 
-    LOGGER.input_file(training_path)
+    LOGGER.input_file(data_path)
     LOGGER.input_file(predictions_path)
-    orig = pandas.read_csv(training_path, sep="\t")
+    orig = pandas.read_csv(data_path, sep="\t")
     predicted, feature_params, classifier_path, label =\
         load_predictions(predictions_path)
     result = measure_performance(orig, predicted,
