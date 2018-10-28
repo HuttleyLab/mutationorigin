@@ -262,16 +262,17 @@ def nb_train(training_path, output_path, label_col, seed,
 
 
 @main.command()
-@_germline_path
+@_training_path
 @_output_path
 @_label_col
 @_seed
 @_flank_size
 @_feature_dim
 @_proximal
+@_usegc
 @_overwrite
-def ocs_train(germline_path, output_path, label_col, seed,
-              flank_size, feature_dim, proximal, overwrite):
+def ocs_train(training_path, output_path, label_col, seed,
+              flank_size, feature_dim, proximal, usegc, overwrite):
     """one-class svm training for outlier detection"""
     if seed is None:
         seed = int(time.time())
@@ -279,7 +280,7 @@ def ocs_train(germline_path, output_path, label_col, seed,
     start_time = time.time()
     os.makedirs(output_path, exist_ok=True)
 
-    basename = get_basename(germline_path)
+    basename = get_basename(training_path)
     outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
@@ -290,10 +291,10 @@ def ocs_train(germline_path, output_path, label_col, seed,
         exit(0)
 
     LOGGER.log_file_path = logfile_path
-    LOGGER.input_file(germline_path)
+    LOGGER.input_file(training_path)
 
     start_time = time.time()
-    _, _, feat, n_dims, names = data_to_numeric(germline_path,
+    _, _, feat, n_dims, names = data_to_numeric(training_path,
                                                 label_col, flank_size,
                                                 feature_dim, proximal,
                                                 one_class='g')
