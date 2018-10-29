@@ -280,26 +280,26 @@ def predict(ctx, classifier_paths, test_data_paths, output_path, overwrite, n_jo
 
 
 @main.command()
-@_data_path
+@_test_data_paths
 @_predictions_path
 @_output_path
 @_label_col
 @_overwrite
 @_n_jobs
 @click.pass_context
-def performance(ctx, data_path, predictions_path, output_path, label_col,
+def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
                 overwrite, n_jobs):
     """batch classifier performance assessment"""
     args = locals()
     args.pop('ctx')
     args.pop("n_jobs")
-    args.pop("data_path")
+    args.pop("test_data_paths")
     args.pop("predictions_path")
     args.pop("output_path")
 
     test_pattern = FILENAME_PATTERNS["sample_data"]["test"]
     predict_pattern = FILENAME_PATTERNS["predict"]
-    test_fns = exec_command(f"find {data_path} -name {test_pattern}")
+    test_fns = exec_command(f"find {test_data_paths} -name {test_pattern}")
 
     data_fns = test_fns.splitlines()
     data_mapped = {}
