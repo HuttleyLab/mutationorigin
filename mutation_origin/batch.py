@@ -124,6 +124,12 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
             params = params.copy()
             params.update(other_features)
             params.update(args)
+            dim = params.get("feature_dim")
+            flank_size = params["flank_size"]
+            if dim is None or dim < 2 or flank_size < 2:
+                # prox only sensible with dim >= 2, flank_size > 1
+                params["proximal"] = False
+
             params['training_path'] = train_path
             params['output_path'] = os.path.join(output_path, data_size,
                                                  dirname_from_features(params))
