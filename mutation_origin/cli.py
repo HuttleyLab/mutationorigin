@@ -7,6 +7,7 @@ import os
 import time
 import pickle
 import click
+from tqdm import tqdm
 import pandas
 from numpy.random import seed as np_seed
 from scitrack import CachingLogger
@@ -448,8 +449,9 @@ def performance(data_path, predictions_path, output_path, label_col,
               ' files produced by performance.')
 @_output_path
 @_overwrite
-def collect(base_path, output_path, overwrite):
-    """collects all classifier performance stats and writes out to tsv file"""
+def collate(base_path, output_path, overwrite):
+    """collates all classifier performance stats and writes
+    to a single tsv file"""
     LOGGER.log_args()
     outpath = os.path.join(output_path, "collect.tsv.gz")
     logfile_path = os.path.join(output_path, "collect.log")
@@ -471,7 +473,7 @@ def collect(base_path, output_path, overwrite):
 
     records = []
     keys = set()
-    for fn in stat_fns:
+    for fn in tqdm(stat_fns):
         LOGGER.input_file(fn)
         data = load_json(fn)
         row = {"stat_path": fn, "classifier_path": data["classifier_path"],
