@@ -113,3 +113,7 @@ _test_data_paths = click.option("-tp", "--test_data_paths",
                                 type=click.Path(),
                                 required=True,
                                 help="basedir containing data for testing")
+_max_flank = click.option('-x', '--max_flank',
+                          type=click.IntRange(1, 30),
+                          default=4,
+                          help='Maximum flank size.')

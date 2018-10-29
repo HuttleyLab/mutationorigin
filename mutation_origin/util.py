@@ -121,10 +121,10 @@ def dirname_from_features(features):
     return dirname
 
 
-def flank_dim_combinations(start_flank=0, get_dims=None):
+def flank_dim_combinations(max_flank=4, start_flank=0, get_dims=None):
     """returns flank_size/dim combinations"""
     combinations = []
-    for fz in range(start_flank, 4):
+    for fz in range(start_flank, max_flank):
         if fz == 0:
             combinations.append(dict(flank_size=fz))
             continue
