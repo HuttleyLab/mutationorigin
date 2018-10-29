@@ -1,4 +1,8 @@
 """command line interface for mutation_origin"""
+from warnings import filterwarnings
+
+filterwarnings("ignore", "Data with input dtype int8 was converted")
+
 import os
 import time
 import pickle
