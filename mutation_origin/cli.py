@@ -19,7 +19,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _training_path, _c_values, _penalty_options,
                                  _n_jobs, _classifier_path, _data_path,
                                  _predictions_path, _alpha_options,
-                                 _overwrite)
+                                 _overwrite, _verbose)
 from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import get_scaler, inverse_transform_response
 from mutation_origin.classify import (logistic_regression, one_class_svm,
@@ -146,9 +146,10 @@ def sample_data(enu_path, germline_path, output_path, seed,
 @_penalty_options
 @_n_jobs
 @_overwrite
+@_verbose
 def lr_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
-             usegc, c_values, penalty_options, n_jobs, overwrite):
+             usegc, c_values, penalty_options, n_jobs, overwrite, verbose):
     """logistic regression training, validation, dumps optimal model"""
     if not seed:
         seed = int(time.time())
@@ -160,9 +161,10 @@ def lr_train(training_path, output_path, label_col, seed,
     basename = get_basename(training_path)
     outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl")
     if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "use overwrite to force.",
-                    fg='green')
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "use overwrite to force.",
+                        fg='green')
         return
 
     logfile_path = os.path.join(output_path,
@@ -211,9 +213,10 @@ def lr_train(training_path, output_path, label_col, seed,
 @_alpha_options
 @_n_jobs
 @_overwrite
+@_verbose
 def nb_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
-             usegc, alpha_options, n_jobs, overwrite):
+             usegc, alpha_options, n_jobs, overwrite, verbose):
     """Naive Bayes training, validation, dumps optimal model"""
     if not seed:
         seed = int(time.time())
@@ -227,9 +230,10 @@ def nb_train(training_path, output_path, label_col, seed,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-nb.log")
     if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "use overwrite to force.",
-                    fg='green')
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "use overwrite to force.",
+                        fg='green')
         return
 
     LOGGER.log_file_path = logfile_path
@@ -273,8 +277,9 @@ def nb_train(training_path, output_path, label_col, seed,
 @_proximal
 @_usegc
 @_overwrite
+@_verbose
 def ocs_train(training_path, output_path, label_col, seed,
-              flank_size, feature_dim, proximal, usegc, overwrite):
+              flank_size, feature_dim, proximal, usegc, overwrite, verbose):
     """one-class svm training for outlier detection"""
     if seed is None:
         seed = int(time.time())
@@ -287,9 +292,10 @@ def ocs_train(training_path, output_path, label_col, seed,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
     if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "use overwrite to force.",
-                    fg='green')
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "use overwrite to force.",
+                        fg='green')
         return
 
     LOGGER.log_file_path = logfile_path
@@ -321,7 +327,8 @@ def ocs_train(training_path, output_path, label_col, seed,
 @_data_path
 @_output_path
 @_overwrite
-def predict(classifier_path, data_path, output_path, overwrite):
+@_verbose
+def predict(classifier_path, data_path, output_path, overwrite, verbose):
     """predict labels for data"""
     LOGGER.log_args()
     with open(classifier_path, 'rb') as clf:
@@ -345,9 +352,10 @@ def predict(classifier_path, data_path, output_path, overwrite):
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-predict-{class_label}.log")
     if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "use overwrite to force.",
-                    fg='green')
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "use overwrite to force.",
+                        fg='green')
         return
 
     LOGGER.log_file_path = logfile_path
@@ -394,8 +402,9 @@ def predict(classifier_path, data_path, output_path, overwrite):
 @_output_path
 @_label_col
 @_overwrite
+@_verbose
 def performance(data_path, predictions_path, output_path, label_col,
-                overwrite):
+                overwrite, verbose):
     """produce measures of classifier performance"""
     LOGGER.log_args()
     if not (data_path or predictions_path):
@@ -411,9 +420,10 @@ def performance(data_path, predictions_path, output_path, label_col,
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-performance.log")
     if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "Use overwrite to force.",
-                    fg='green')
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "Use overwrite to force.",
+                        fg='green')
         return
 
     LOGGER.log_file_path = logfile_path

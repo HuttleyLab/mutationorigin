@@ -5,6 +5,7 @@ import os
 os.environ['DONT_USE_MPI'] = "1"
 filterwarnings("ignore", ".*Not using MPI.*")
 import click
+from tqdm import tqdm
 from cogent3.util import parallel
 from mutation_origin.cli import (sample_data as mutori_sample,
                                  lr_train as mutori_lr_train,
@@ -20,7 +21,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _n_jobs, _classifier_paths, _data_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _size_range, _model_range,
-                                 _test_data_paths, _max_flank)
+                                 _test_data_paths, _max_flank, _verbose)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
@@ -64,8 +65,10 @@ def sample_data(ctx, enu_path, germline_path, output_path, seed,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_sample,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_sample,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
@@ -163,8 +166,10 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_lr_train,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_lr_train,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
@@ -197,8 +202,10 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_nb_train,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_nb_train,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
@@ -228,8 +235,10 @@ def ocs_train(ctx, training_path, output_path, label_col, seed,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_ocs_train,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_ocs_train,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
@@ -289,8 +298,10 @@ def predict(ctx, classifier_paths, test_data_paths, output_path,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_predict,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_predict,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
@@ -301,9 +312,10 @@ def predict(ctx, classifier_paths, test_data_paths, output_path,
 @_label_col
 @_overwrite
 @_n_jobs
+@_verbose
 @click.pass_context
 def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
-                overwrite, n_jobs):
+                overwrite, n_jobs, verbose):
     """batch classifier performance assessment"""
     args = locals()
     args.pop('ctx')
@@ -350,8 +362,10 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
-    for r in parallel.imap(lambda args: ctx.invoke(mutori_performance,
-                                                   **args), arg_sets):
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_performance,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
         pass
 
 
