@@ -70,7 +70,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
     if os.path.exists(logfile_path) and not overwrite:
         click.secho(f"Exists: {logfile_path}! use overwrite to force.",
                     fg='red')
-        exit(-1)
+        return
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(enu_path)
@@ -159,7 +159,8 @@ def lr_train(training_path, output_path, label_col, seed,
         click.secho(f"Skipping. {outpath} exists. "
                     "use overwrite to force.",
                     fg='green')
-        exit(0)
+        return
+
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-lr.log")
     LOGGER.log_file_path = logfile_path
@@ -225,7 +226,8 @@ def nb_train(training_path, output_path, label_col, seed,
         click.secho(f"Skipping. {outpath} exists. "
                     "use overwrite to force.",
                     fg='green')
-        exit(0)
+        return
+
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
 
@@ -284,7 +286,7 @@ def ocs_train(training_path, output_path, label_col, seed,
         click.secho(f"Skipping. {outpath} exists. "
                     "use overwrite to force.",
                     fg='green')
-        exit(0)
+        return
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(training_path)
@@ -342,7 +344,7 @@ def predict(classifier_path, data_path, output_path, overwrite):
         click.secho(f"Skipping. {outpath} exists. "
                     "use overwrite to force.",
                     fg='green')
-        exit(0)
+        return
 
     LOGGER.log_file_path = logfile_path
     LOGGER.input_file(classifier_path)
@@ -408,7 +410,7 @@ def performance(data_path, predictions_path, output_path, label_col,
         click.secho(f"Skipping. {outpath} exists. "
                     "Use overwrite to force.",
                     fg='green')
-        exit(0)
+        return
 
     LOGGER.log_file_path = logfile_path
 
@@ -449,7 +451,7 @@ def collect(base_path, output_path, overwrite):
     if not stat_fns:
         msg = f'No files matching "*performance.json*" in {base_path}'
         click.secho(msg, fg='red')
-        exit(0)
+        return
 
     LOGGER.log_file_path = logfile_path
 
