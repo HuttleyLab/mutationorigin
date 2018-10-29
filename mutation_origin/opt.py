@@ -117,3 +117,7 @@ _max_flank = click.option('-x', '--max_flank',
                           type=click.IntRange(1, 33),
                           default=4,
                           help='Maximum flank size.')
+_verbose = click.option('-v', '--verbose',
+                        count=True,
+                        default=0,
+                        help="amount of output to display")
