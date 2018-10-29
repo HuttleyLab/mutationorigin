@@ -1,5 +1,3 @@
-import numpy as np
-from sklearn.preprocessing import LabelEncoder
 from cogent3.util.unit_test import TestCase, main
 from mutation_origin.util import get_enu_germline_sizes
 
