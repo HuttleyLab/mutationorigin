@@ -57,7 +57,6 @@ def sample_data(ctx, enu_path, germline_path, output_path, seed,
     arg_sets = []
     for size in sizes:
         arg_group = args.copy()
-        arg_group['test_size'] = size * 1000
         arg_group['train_size'] = size * 1000
         arg_group['output_path'] = os.path.join(output_path, f"{size}k")
         arg_sets.append(arg_group)

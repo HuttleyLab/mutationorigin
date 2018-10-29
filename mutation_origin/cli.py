@@ -51,12 +51,11 @@ def main():
 @_germline_path
 @_output_path
 @_train_size
-@_test_size
 @_enu_ratio
 @_numreps
 @_overwrite
 def sample_data(enu_path, germline_path, output_path, seed,
-                train_size, test_size,
+                train_size,
                 enu_ratio, numreps, overwrite):
     """creates train/test sample data"""
     if seed is None:
@@ -79,6 +78,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
 
     enu = pandas.read_csv(enu_path, sep="\t", header=0)
     germline = pandas.read_csv(germline_path, sep="\t", header=0)
+    test_size = train_size
     train_size = train_size // 2
     if enu_ratio == 1:
         germ_test_size = test_size // 2
