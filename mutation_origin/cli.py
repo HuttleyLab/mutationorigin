@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 
 from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _germline_path, _output_path, _flank_size,
-                                 _train_size, _test_size, _enu_ratio,
+                                 _train_size, _enu_ratio,
                                  _numreps, _label_col, _proximal, _usegc,
                                  _training_path, _c_values, _penalty_options,
                                  _n_jobs, _classifier_path, _data_path,
