@@ -53,7 +53,8 @@ setup(
         'click',
         'sklearn',
         'scitrack',
-        'scipy'
+        'scipy',
+        'tqdm'
     ],
     # note: http://stackoverflow.com/questions/3472430/how-can-i-make-setuptools-install-a-package-thats-not-on-pypi
     # and http://stackoverflow.com/questions/17366784/setuptools-unable-to-use-link-from-dependency-links/17442663#17442663
