@@ -50,6 +50,14 @@ def exec_command(cmnd, stdout=PIPE, stderr=PIPE):
     return r
 
 
+def get_enu_germline_sizes(total, enu_ratio):
+    """returns the enu and germline sample sizes to satisfy enu_ratio"""
+    unit = total / (enu_ratio + 1)
+    enu = int(unit * enu_ratio)
+    germline = total - enu
+    return enu, germline
+
+
 def valid_response_values(data):
     vals = set(data)
     return vals <= {'e', 'g'}

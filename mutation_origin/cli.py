@@ -22,7 +22,7 @@ from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
 from mutation_origin.util import (dump_json, load_json, load_predictions,
                                   get_basename, get_classifier_label,
-                                  exec_command)
+                                  exec_command, get_enu_germline_sizes)
 from mutation_origin.postprocess import measure_performance
 
 
@@ -80,25 +80,21 @@ def sample_data(enu_path, germline_path, output_path, seed,
     germline = pandas.read_csv(germline_path, sep="\t", header=0)
     test_size = train_size
     train_size = train_size // 2
-    if enu_ratio == 1:
-        germ_test_size = test_size // 2
-    else:
-        # adjust the test sizes for ENU/germline
-        # first convert both
-        germ_test_size = test_size // enu_ratio
+    train_enu_ratio, test_enu_ratio = enu_ratio
+    enu_train_size, germ_train_size = get_enu_germline_sizes(train_size,
+                                                             train_enu_ratio)
+    enu_test_size, germ_test_size = get_enu_germline_sizes(test_size,
+                                                           test_enu_ratio)
+    assert min(enu_train_size, germ_train_size,
+               enu_test_size, germ_test_size) > 0
 
-    enu_test_size = test_size - germ_test_size
-    assert enu_test_size > 0
-
-    if (train_size + enu_test_size > enu.shape[0] or
-            train_size + germ_test_size > germline.shape[0]):
+    if (2 * train_size > enu.shape[0] or
+            2 * train_size > germline.shape[0]):
         print(f"ENU data set size: {enu.shape[0]}")
         print(f"Germline data set size: {germline.shape[0]}")
         print(f"Train set size: {train_size}")
-        print(f"ENU test size: {enu_test_size}")
-        print(f"Germline test size: {germ_test_size}")
-        raise ValueError("sum of train size and test size exceeds"
-                         " training data size")
+        raise ValueError("2 x train size exceeds"
+                         " size of training data source(s)")
 
     for rep in range(numreps):
         test_outpath = os.path.join(output_path, f"test-{rep}.tsv.gz")

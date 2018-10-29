@@ -54,9 +54,11 @@ _test_size = click.option('--test_size', required=True, type=int,
                           callback=_make_number,
                           help='the total number of test samples.')
 _enu_ratio = click.option('-r', '--enu_ratio',
-                          type=click.Choice(['1', '10', '100']), default='1',
-                          callback=_make_number,
-                          help='Ratio of ENU to germline in testing data.')
+                          type=click.Choice(['1,1', '10,10', '100,100']),
+                          default='1,1',
+                          callback=_make_num_series,
+                          help='Ratio of ENU to germline in '
+                          'training,testing data.')
 _numreps = click.option('-n', '--numreps', required=True, type=int,
                         help='Number of times to run the splitting'
                         ' process for.')
