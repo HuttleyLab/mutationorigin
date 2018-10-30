@@ -206,3 +206,11 @@ def summary_stat_table(table, factors):
                       ["mean_auc", "std_auc"], rows=rows)
     table = table.sorted(reverse="mean_auc")
     return table
+
+
+def iter_indices(total, block_size):
+    """yields a block_size numpy array of indices up to total"""
+    for start in range(0, total, block_size):
+        end = min(total, start + block_size)
+        indices = range(start, end)
+        yield list(indices)

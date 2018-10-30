@@ -1,5 +1,5 @@
 from cogent3.util.unit_test import TestCase, main
-from mutation_origin.util import get_enu_germline_sizes
+from mutation_origin.util import get_enu_germline_sizes, iter_indices
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -21,6 +21,13 @@ class TestUtilityFuncs(TestCase):
         self.assertEqual(got, (10, 1))
         got = get_enu_germline_sizes(101, 100)
         self.assertEqual(got, (100, 1))
+
+    def test_iter_indices(self):
+        """fully generates indices for a given block size"""
+        got = []
+        for indices in iter_indices(6, 2):
+            got.extend(indices)
+        self.assertEqual(got, [0, 1, 2, 3, 4, 5])
 
 
 if __name__ == '__main__':
