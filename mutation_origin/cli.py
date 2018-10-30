@@ -25,9 +25,9 @@ from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import get_scaler, inverse_transform_response
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
-from mutation_origin.util import (dump_json, load_json, load_predictions,
+from mutation_origin.util import (dump_json, load_predictions,
                                   get_basename, get_classifier_label,
-                                  exec_command, get_enu_germline_sizes)
+                                  get_enu_germline_sizes)
 from mutation_origin.postprocess import measure_performance
 
 
@@ -441,53 +441,6 @@ def performance(data_path, predictions_path, output_path, label_col,
     result["classifier_label"] = label
     dump_json(outpath, result)
 
-
-@main.command()
-@click.option('-bp', '--base_path',
-              type=click.Path(exists=True),
-              help='Base directory containing all'
-              ' files produced by performance.')
-@_output_path
-@_overwrite
-def collate(base_path, output_path, overwrite):
-    """collates all classifier performance stats and writes
-    to a single tsv file"""
-    LOGGER.log_args()
-    outpath = os.path.join(output_path, "collect.tsv.gz")
-    logfile_path = os.path.join(output_path, "collect.log")
-    if os.path.exists(outpath) and not overwrite:
-        click.secho(f"Skipping. {outpath} exists. "
-                    "Use overwrite to force.",
-                    fg='green')
-        exit(0)
-
-    stat_fns = exec_command(f'find {base_path} -name'
-                            ' "*performance.json*"')
-    stat_fns = stat_fns.splitlines()
-    if not stat_fns:
-        msg = f'No files matching "*performance.json*" in {base_path}'
-        click.secho(msg, fg='red')
-        return
-
-    LOGGER.log_file_path = logfile_path
-
-    records = []
-    keys = set()
-    for fn in tqdm(stat_fns):
-        LOGGER.input_file(fn)
-        data = load_json(fn)
-        row = {"stat_path": fn, "classifier_path": data["classifier_path"],
-               "auc": data["auc"], "algorithm": data["classifier_label"]}
-        row.update(data["feature_params"])
-        keys.update(row.keys())
-        records.append(row)
-
-    columns = list(sorted(keys))
-    rows = list(map(lambda r: [r.get(c, None) for c in columns], records))
-    df = pandas.DataFrame(rows, columns=columns)
-    df = df.sort_values(by=["auc"], ascending=False)
-    df.to_csv(outpath, index=False, sep="\t", compression='gzip')
-    LOGGER.output_file(outpath)
 
 
 if __name__ == "__main__":

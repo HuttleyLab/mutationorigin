@@ -5,6 +5,7 @@ import os
 os.environ['DONT_USE_MPI'] = "1"
 filterwarnings("ignore", ".*Not using MPI.*")
 import click
+import pandas
 from tqdm import tqdm
 from cogent3.util import parallel
 from mutation_origin.cli import (sample_data as mutori_sample,
@@ -26,7 +27,10 @@ from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
                                   data_rep_from_path,
-                                  feature_set_from_path)
+                                  feature_set_from_path, load_json)
+from scitrack import CachingLogger
+
+LOGGER = CachingLogger()
 
 
 @click.group()
@@ -373,6 +377,54 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
                                                 **args), arg_sets)
     for r in tqdm(gen, total=total):
         pass
+
+
+@main.command()
+@click.option('-bp', '--base_path',
+              type=click.Path(exists=True),
+              help='Base directory containing all'
+              ' files produced by performance.')
+@_output_path
+@_overwrite
+def collate(base_path, output_path, overwrite):
+    """collates all classifier performance stats and writes
+    to a single tsv file"""
+    LOGGER.log_args()
+    outpath = os.path.join(output_path, "collect.tsv.gz")
+    logfile_path = os.path.join(output_path, "collect.log")
+    if os.path.exists(outpath) and not overwrite:
+        click.secho(f"Skipping. {outpath} exists. "
+                    "Use overwrite to force.",
+                    fg='green')
+        exit(0)
+
+    stat_fns = exec_command(f'find {base_path} -name'
+                            ' "*performance.json*"')
+    stat_fns = stat_fns.splitlines()
+    if not stat_fns:
+        msg = f'No files matching "*performance.json*" in {base_path}'
+        click.secho(msg, fg='red')
+        return
+
+    LOGGER.log_file_path = logfile_path
+
+    records = []
+    keys = set()
+    for fn in tqdm(stat_fns):
+        LOGGER.input_file(fn)
+        data = load_json(fn)
+        row = {"stat_path": fn, "classifier_path": data["classifier_path"],
+               "auc": data["auc"], "algorithm": data["classifier_label"]}
+        row.update(data["feature_params"])
+        keys.update(row.keys())
+        records.append(row)
+
+    columns = list(sorted(keys))
+    rows = list(map(lambda r: [r.get(c, None) for c in columns], records))
+    df = pandas.DataFrame(rows, columns=columns)
+    df = df.sort_values(by=["auc"], ascending=False)
+    df.to_csv(outpath, index=False, sep="\t", compression='gzip')
+    LOGGER.output_file(outpath)
 
 
 if __name__ == '__main__':
