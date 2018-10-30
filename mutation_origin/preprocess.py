@@ -15,12 +15,10 @@ __email__ = "Gavin.Huttley@anu.edu.au"
 __status__ = "Development"
 
 
-def data_to_numeric(path, label_col=None, flank_size=None,
+def data_to_numeric(data, label_col=None, flank_size=None,
                     feature_dim=None, proximal=False, usegc=False,
                     one_class=None):
     """returns one-hot encoded data and vector of dimensions"""
-    data = pandas.read_csv(path, sep='\t')
-
     if label_col and not valid_response_values(data[label_col]):
         raise ValueError("response not denoted by 'e'/'g'")
 

@@ -6,6 +6,7 @@ filterwarnings("ignore", "Data with input dtype int8 was converted")
 import os
 import time
 import pickle
+from collections import defaultdict
 import click
 from tqdm import tqdm
 import pandas
@@ -27,7 +28,7 @@ from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
 from mutation_origin.util import (dump_json, load_predictions,
                                   get_basename, get_classifier_label,
-                                  get_enu_germline_sizes)
+                                  get_enu_germline_sizes, iter_indices)
 from mutation_origin.postprocess import measure_performance
 
 
@@ -364,30 +365,39 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
     LOGGER.input_file(data_path)
 
     start_time = time.time()
-    ids, resp, feat, n_dims, names = data_to_numeric(data_path,
-                                                     **feature_params)
-    if scaler:
-        feat = scaler.transform(feat)
-
     # if NB, the score func name is different
     if class_label == "nb":
         classifier.decision_function = classifier.predict_proba
-    predictions, scores = predict_origin(classifier, feat)
-    if class_label == "nb":
-        # each `score' is the probability of belong to either class
-        # reduce to just the first class
-        scores = scores[:, 1]
-    elif class_label == 'ocs':
-        scores = scores[:, 0]
 
-    predictions = inverse_transform_response(predictions)
+    fulldata = pandas.read_csv(data_path, sep='\t')
+
     result = {}
-    result['predictions'] = {'varid': ids,
-                             'predicted': predictions,
-                             'scores': scores.tolist()}
     result['feature_params'] = feature_params
     result['classifier_label'] = class_label
     result['classifier_path'] = classifier_path
+    result['predictions'] = defaultdict(list)
+    total = fulldata.shape[0] // 2000
+    pbar = tqdm(iter_indices(fulldata.shape[0], block_size=2000), total=total)
+    for indices in pbar:
+        data = fulldata.iloc[indices]
+        ids, resp, feat, n_dims, names = data_to_numeric(data,
+                                                         **feature_params)
+        if scaler:
+            feat = scaler.transform(feat)
+
+        predictions, scores = predict_origin(classifier, feat)
+        if class_label == "nb":
+            # each `score' is the probability of belong to either class
+            # reduce to just the first class
+            scores = scores[:, 1]
+        elif class_label == 'ocs':
+            scores = scores[:, 0]
+
+        predictions = inverse_transform_response(predictions)
+        result['predictions']['varid'].extend(list(ids))
+        result['predictions']['predicted'].extend(list(predictions))
+        result['predictions']['scores'].extend(list(scores))
+
     dump_json(outpath, result)
     LOGGER.output_file(outpath)
     duration = time.time() - start_time
