@@ -7,6 +7,7 @@ filterwarnings("ignore", ".*Not using MPI.*")
 import click
 import pandas
 from tqdm import tqdm
+from cogent3 import LoadTable
 from cogent3.util import parallel
 from mutation_origin.cli import (sample_data as mutori_sample,
                                  lr_train as mutori_lr_train,
@@ -27,7 +28,8 @@ from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
                                   data_rep_from_path,
-                                  feature_set_from_path, load_json)
+                                  feature_set_from_path, load_json,
+                                  summary_stat_table, model_name_from_features)
 from scitrack import CachingLogger
 
 LOGGER = CachingLogger()
@@ -419,11 +421,25 @@ def collate(base_path, output_path, overwrite):
         keys.update(row.keys())
         records.append(row)
 
-    columns = list(sorted(keys))
+    columns = sorted(keys)
     rows = list(map(lambda r: [r.get(c, None) for c in columns], records))
-    df = pandas.DataFrame(rows, columns=columns)
-    df = df.sort_values(by=["auc"], ascending=False)
-    df.to_csv(outpath, index=False, sep="\t", compression='gzip')
+    table = LoadTable(header=columns, rows=rows)
+    table = table.sorted(reverse="auc")
+    table = table.with_new_column("name",
+                                  lambda x: model_name_from_features(*x),
+                                  columns=["flank_size", "feature_dim",
+                                           "usegc", "proximal"])
+    table = table.with_new_column("size", sample_size_from_path,
+                                  columns="classifier_path")
+    table.write(outpath)
+    LOGGER.output_file(outpath)
+
+    # make summary statistics via grouping by factors
+    factors = ["algorithm", "name", "flank_size", "feature_dim",
+               "proximal", "usegc", "size"]
+    summary = summary_stat_table(table, factors=factors)
+    outpath = os.path.join(output_path, "summary_statistics.tsv.gz")
+    summary.write(outpath)
     LOGGER.output_file(outpath)
 
 

@@ -2,9 +2,13 @@ import re
 import sys
 from subprocess import Popen, PIPE
 import os
+from tqdm import tqdm
 import json
 import pandas
+import numpy
 from cogent3.util.misc import open_, get_format_suffixes
+from cogent3 import LoadTable
+
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -165,3 +169,40 @@ _feats = re.compile(r"f\d+[d\d]*p*[GC]*")
 def feature_set_from_path(path):
     features = _feats.findall(path)[0]
     return features
+
+
+def model_name_from_features(flank, dim, usegc, proximal):
+    """returns the model name from a feature set"""
+    if flank == 0:
+        model = ["MD"]
+    elif flank and dim == 1:
+        model = ["MD", "I"]
+    elif flank and dim == 2 * flank:
+        assert not proximal
+        model = ["FS"]
+    elif dim > 1:
+        prox = "p" if proximal else ""
+        model = ["MD", "I"] + [f"{i}D{prox}" for i in range(2, dim + 1)]
+    else:
+        raise ValueError("Unexpected model", flank, flank)
+    if usegc:
+        model.append("GC")
+
+    name = "+".join(model)
+    return name
+
+
+def summary_stat_table(table, factors):
+    """returns summary statistics for classifier, feature set combination"""
+    distinct = table.distinct_values(factors)
+    rows = []
+    for comb in tqdm(distinct):
+        subtable = table.filtered(lambda x: tuple(x) == tuple(comb),
+                                  columns=factors)
+        aurocs = numpy.array(subtable.tolist('auc'))
+        rows.append(list(comb) + [aurocs.mean(), aurocs.std(ddof=1)])
+
+    table = LoadTable(header=list(factors) +
+                      ["mean_auc", "std_auc"], rows=rows)
+    table = table.sorted(reverse="mean_auc")
+    return table
