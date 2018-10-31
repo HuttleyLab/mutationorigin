@@ -28,7 +28,8 @@ from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes)
 from mutation_origin.util import (dump_json, load_predictions,
                                   get_basename, get_classifier_label,
-                                  get_enu_germline_sizes, iter_indices)
+                                  get_enu_germline_sizes, iter_indices,
+                                  load_classifier)
 from mutation_origin.postprocess import measure_performance
 
 
@@ -333,15 +334,7 @@ def ocs_train(training_path, output_path, label_col, seed,
 def predict(classifier_path, data_path, output_path, overwrite, verbose):
     """predict labels for data"""
     LOGGER.log_args()
-    with open(classifier_path, 'rb') as clf:
-        classifier = pickle.load(clf)
-    try:
-        feature_params = classifier["feature_params"]
-        scaler = classifier.get('scaler', None)
-        classifier = classifier["classifier"]
-    except KeyError:
-        raise ValueError("pickle formatted file does not "
-                         "contain classifier")
+    classifier, feature_params, scaler = load_classifier(classifier_path)
 
     class_label = get_classifier_label(classifier)
     basename_class = get_basename(classifier_path)

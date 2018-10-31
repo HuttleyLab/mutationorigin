@@ -2,7 +2,7 @@ import re
 import sys
 from subprocess import Popen, PIPE
 import os
-from tqdm import tqdm
+import pickle
 import json
 import pandas
 import numpy
@@ -90,6 +90,21 @@ def load_predictions(path):
     cpath = data.get("classifier_path", None)
     label = data.get("classifier_label", None)
     return df, params, cpath, label
+
+
+def load_classifier(path):
+    """returns dict of pickled classifier and features info"""
+    with open(path, 'rb') as clf:
+        classifier = pickle.load(clf)
+    try:
+        feature_params = classifier["feature_params"]
+        scaler = classifier.get('scaler', None)
+        classifier = classifier["classifier"]
+    except KeyError:
+        raise ValueError("pickle formatted file does not "
+                         "contain classifier")
+    return classifier, feature_params, scaler
+
 
 
 def get_basename(path):
