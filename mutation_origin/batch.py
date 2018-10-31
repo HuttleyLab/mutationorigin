@@ -392,8 +392,8 @@ def collate(base_path, output_path, overwrite):
     """collates all classifier performance stats and writes
     to a single tsv file"""
     LOGGER.log_args()
-    outpath = os.path.join(output_path, "collect.tsv.gz")
-    logfile_path = os.path.join(output_path, "collect.log")
+    outpath = os.path.join(output_path, "collated.tsv.gz")
+    logfile_path = os.path.join(output_path, "collated.log")
     if os.path.exists(outpath) and not overwrite:
         click.secho(f"Skipping. {outpath} exists. "
                     "Use overwrite to force.",
