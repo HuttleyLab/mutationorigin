@@ -254,6 +254,65 @@ def ocs_train(ctx, training_path, output_path, label_col, seed,
         pass
 
 
+def _get_predict_query_argsets(args, classifier_fn, test_data_paths,
+                               output_path, overwrite):
+    """returns argsets for case where single classifier and multiple queries"""
+    dirname = os.path.dirname(test_data_paths)
+    data_pattern = os.path.basename(test_data_paths)
+    cmnd = f"find {dirname} -name {data_pattern}"
+    data_fns = exec_command(cmnd)
+    # create a dict from sample size, number
+    data_fns = data_fns.splitlines()
+
+    # using a single classifier on multiple data files
+    arg_sets = []
+    for path in data_fns:
+        arg_group = args.copy()
+        arg_group['classifier_path'] = classifier_fn
+        arg_group['output_path'] = output_path
+        arg_group['data_path'] = path
+        arg_sets.append(arg_group)
+    return arg_sets
+
+
+def _get_predict_test_argsets(args, classifier_fns, test_data_paths,
+                              output_path, overwrite):
+    """returns argsets for case where number of classifier fns match number of
+    data fns"""
+    test_pattern = FILENAME_PATTERNS["sample_data"]["test"]
+    data_fns = exec_command(f"find {test_data_paths} -name {test_pattern}")
+    # create a dict from sample size, number
+    data_fns = data_fns.splitlines()
+    data_mapped = {}
+    for path in data_fns:
+        size = sample_size_from_path(path)
+        size = f"{size // 1000}k"
+        rep = data_rep_from_path("sample_data", path)
+        data_mapped[(size, rep)] = path
+
+    classifier_fns = classifier_fns.splitlines()
+
+    paired = []
+    for path in classifier_fns:
+        size = sample_size_from_path(path)
+        size = f"{size // 1000}k"
+        rep = data_rep_from_path("train", path)
+        featdir = feature_set_from_path(path)
+        paired.append(dict(classifier_path=path,
+                           data_path=data_mapped[(size, rep)],
+                           size=size,
+                           featdir=featdir))
+    arg_sets = []
+    for pair in paired:
+        arg_group = args.copy()
+        size = pair.pop('size')
+        featdir = pair.pop('featdir')
+        arg_group.update(pair)
+        arg_group['output_path'] = os.path.join(output_path, size, featdir)
+        arg_sets.append(arg_group)
+    return arg_sets
+
+
 @main.command()
 @_classifier_paths
 @_test_data_paths
@@ -273,39 +332,16 @@ def predict(ctx, classifier_paths, test_data_paths, output_path,
     class_pattern = FILENAME_PATTERNS["train"]
     classifier_fns = exec_command(
         f"find {classifier_paths} -name {class_pattern}")
-
-    test_pattern = FILENAME_PATTERNS["sample_data"]["test"]
-    data_fns = exec_command(f"find {test_data_paths} -name {test_pattern}")
-
-    # create a dict from sample size, number
-    data_fns = data_fns.splitlines()
-    data_mapped = {}
-    for path in data_fns:
-        size = sample_size_from_path(path)
-        size = f"{size // 1000}k"
-        rep = data_rep_from_path("sample_data", path)
-        data_mapped[(size, rep)] = path
-
     classifier_fns = classifier_fns.splitlines()
-    paired = []
-    for path in classifier_fns:
-        size = sample_size_from_path(path)
-        size = f"{size // 1000}k"
-        rep = data_rep_from_path("train", path)
-        featdir = feature_set_from_path(path)
-        paired.append(dict(classifier_path=path,
-                           data_path=data_mapped[(size, rep)],
-                           size=size,
-                           featdir=featdir))
 
-    arg_sets = []
-    for pair in paired:
-        arg_group = args.copy()
-        size = pair.pop('size')
-        featdir = pair.pop('featdir')
-        arg_group.update(pair)
-        arg_group['output_path'] = os.path.join(output_path, size, featdir)
-        arg_sets.append(arg_group)
+    if "*" in test_data_paths and len(classifier_fns) == 1:
+        classifier_fns = classifier_fns[0]
+        func = _get_predict_query_argsets
+    else:
+        func = _get_predict_test_argsets
+
+    arg_sets = func(args, classifier_fns, test_data_paths, output_path,
+                    overwrite)
 
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
