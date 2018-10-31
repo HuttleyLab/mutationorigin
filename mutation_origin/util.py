@@ -6,6 +6,7 @@ from tqdm import tqdm
 import json
 import pandas
 import numpy
+from tqdm import tqdm
 from cogent3.util.misc import open_, get_format_suffixes
 from cogent3 import LoadTable
 
