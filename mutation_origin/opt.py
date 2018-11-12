@@ -120,3 +120,8 @@ _verbose = click.option('-v', '--verbose',
                         count=True,
                         default=0,
                         help="amount of output to display")
+_strategy = click.option('-sy', '--strategy',
+                         type=click.Choice(['randomized',
+                                            'incremental']),
+                         default='incremental',
+                         help="XGBoost tuner search strategy")

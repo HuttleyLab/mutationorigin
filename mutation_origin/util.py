@@ -124,6 +124,8 @@ def get_classifier_label(classifier):
         label = 'nb'
     elif 'svm' in name:
         label = 'ocs'
+    elif name.startswith('xgb'):
+        label = 'xgb'
     else:
         raise ValueError("Unknown classifier type {name}")
     return label

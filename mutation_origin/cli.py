@@ -21,11 +21,11 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _training_path, _c_values, _penalty_options,
                                  _n_jobs, _classifier_path, _data_path,
                                  _predictions_path, _alpha_options,
-                                 _overwrite, _verbose)
+                                 _overwrite, _verbose, _strategy)
 from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import get_scaler, inverse_transform_response
 from mutation_origin.classify import (logistic_regression, one_class_svm,
-                                      predict_origin, naive_bayes)
+                                      predict_origin, naive_bayes, xgboost)
 from mutation_origin.util import (dump_json, load_predictions,
                                   get_basename, get_classifier_label,
                                   get_enu_germline_sizes, iter_indices,
@@ -279,6 +279,74 @@ def nb_train(training_path, output_path, label_col, seed,
 @_feature_dim
 @_proximal
 @_usegc
+@_strategy
+@_n_jobs
+@_overwrite
+@_verbose
+def xgboost_train(training_path, output_path, label_col, seed,
+                  flank_size, feature_dim, proximal,
+                  usegc, strategy, n_jobs, overwrite, verbose):
+    """Naive Bayes training, validation, dumps optimal model"""
+    if not seed:
+        seed = int(time.time())
+
+    np_seed(seed)
+    LOGGER.log_args()
+    os.makedirs(output_path, exist_ok=True)
+
+    basename = get_basename(training_path)
+    outpath = os.path.join(output_path, f"{basename}-classifier-xgb.pkl")
+    logfile_path = os.path.join(output_path,
+                                f"logs/{basename}-training-xgb.log")
+    if os.path.exists(outpath) and not overwrite:
+        if verbose > 1:
+            click.secho(f"Skipping. {outpath} exists. "
+                        "use overwrite to force.",
+                        fg='green')
+        return
+
+    LOGGER.log_file_path = logfile_path
+    LOGGER.input_file(training_path)
+    start_time = time.time()
+    _, resp, feat, n_dims, names = data_to_numeric(training_path,
+                                                   label_col, flank_size,
+                                                   feature_dim, proximal,
+                                                   usegc)
+
+    # hacking feature so all -1 > 0
+    resp = [v if v > 0 else 0 for v in resp]
+
+    if usegc:
+        # we need to scale the data
+        scaler = get_scaler(feat)
+        feat = scaler.transform(feat)
+
+    classifier = xgboost(feat, resp, seed, strategy, n_jobs, verbose)
+    result = dict(classifier=classifier)
+    result['feature_params'] = dict(feature_dim=feature_dim,
+                                    flank_size=flank_size, proximal=proximal,
+                                    usegc=usegc)
+    if usegc:
+        result['scaler'] = scaler
+
+    with open(outpath, 'wb') as clf_file:
+        pickle.dump(result, clf_file)
+
+    LOGGER.output_file(outpath)
+    duration = time.time() - start_time
+    LOGGER.log_message("%.2f" % (duration / 60.),
+                       label="run duration (minutes)")
+
+
+@main.command()
+@_training_path
+@_output_path
+@_label_col
+@_seed
+@_flank_size
+@_feature_dim
+@_proximal
+@_usegc
 @_overwrite
 @_verbose
 def ocs_train(training_path, output_path, label_col, seed,
@@ -443,7 +511,6 @@ def performance(data_path, predictions_path, output_path, label_col,
     result["classifier_path"] = classifier_path
     result["classifier_label"] = label
     dump_json(outpath, result)
-
 
 
 if __name__ == "__main__":

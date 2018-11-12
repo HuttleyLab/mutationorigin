@@ -2,6 +2,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.svm import OneClassSVM
 from sklearn.model_selection import ShuffleSplit, GridSearchCV
+from xgboost_tuner.tuner import tune_xgb_params
+from xgboost import XGBClassifier
+
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -50,3 +53,42 @@ def predict_origin(classifier, features):
     predictions = classifier.predict(features)
     scores = classifier.decision_function(features)
     return predictions, scores
+
+
+def xgboost(feat, resp, seed, strategy, n_jobs, verbose):
+    """uses xgb tuner to conduct parameter search"""
+    silent = True if not verbose else False
+    rand_search_kwargs = dict(
+        cv_folds=3,
+        label=resp,
+        metric_sklearn='accuracy',
+        metric_xgb='error',
+        n_jobs=n_jobs,
+        objective='binary:logistic',
+        random_state=seed,
+        strategy='randomized',
+        train=feat,
+        colsample_bytree_loc=0.5,
+        colsample_bytree_scale=0.2,
+        subsample_loc=0.5,
+        subsample_scale=0.2)
+    incr_search_kwargs = dict(
+        cv_folds=3,
+        label=resp,
+        metric_sklearn='accuracy',
+        metric_xgb='error',
+        n_jobs=n_jobs,
+        objective='binary:logistic',
+        random_state=seed,
+        strategy='incremental',
+        train=feat,
+        colsample_bytree_min=0.8,
+        colsample_bytree_max=1.0,
+        subsample_min=0.8,
+        subsample_max=1.0)
+    kwargs = {'incremental': incr_search_kwargs,
+              'randomized': rand_search_kwargs}[strategy]
+    best_params, history = tune_xgb_params(verbosity_level=0, **kwargs)
+    booster = XGBClassifier()
+    booster.set_params(**best_params)
+    return booster

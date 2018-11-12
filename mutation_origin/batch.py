@@ -14,7 +14,8 @@ from mutation_origin.cli import (sample_data as mutori_sample,
                                  nb_train as mutori_nb_train,
                                  ocs_train as mutori_ocs_train,
                                  predict as mutori_predict,
-                                 performance as mutori_performance)
+                                 performance as mutori_performance,
+                                 xgboost_train as mutori_xgboost)
 from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _germline_path, _output_path, _flank_size,
                                  _train_size, _test_size, _enu_ratio,
@@ -23,7 +24,8 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _n_jobs, _classifier_paths, _data_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _size_range, _model_range,
-                                 _test_data_paths, _max_flank, _verbose)
+                                 _test_data_paths, _max_flank, _verbose,
+                                 _strategy)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
@@ -216,6 +218,42 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
 
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_nb_train,
+                                                **args), arg_sets)
+    for r in tqdm(gen, total=total):
+        pass
+
+
+@main.command()
+@_training_path
+@_output_path
+@_label_col
+@_seed
+@_max_flank
+@_model_range
+@_proximal
+@_usegc
+@_strategy
+@_n_jobs
+@_overwrite
+@click.pass_context
+def xgboost_train(ctx, training_path, output_path, label_col, seed,
+             max_flank, model_range, proximal, usegc, strategy,
+             alpha_options, n_jobs, overwrite):
+    """batch xgboost training"""
+    args = locals()
+    args.pop('ctx')
+    args.pop("n_jobs")
+    args.pop("max_flank")
+    args.pop("model_range")
+
+    arg_sets = get_train_kwarg_sets(training_path, output_path,
+                                    max_flank, model_range,
+                                    usegc, proximal, args)
+    if n_jobs > 1:
+        parallel.use_multiprocessing(n_jobs)
+
+    total = len(arg_sets)
+    gen = parallel.imap(lambda args: ctx.invoke(mutori_xgboost,
                                                 **args), arg_sets)
     for r in tqdm(gen, total=total):
         pass
