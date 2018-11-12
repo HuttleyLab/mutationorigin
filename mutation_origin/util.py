@@ -165,7 +165,10 @@ _size = re.compile(r"(?<=/)\d+(?=k/)")
 
 def sample_size_from_path(path):
     """returns component of path ijndicating sample size"""
-    size = int(_size.findall(path)[0]) * 1000
+    try:
+        size = int(_size.findall(path)[0]) * 1000
+    except IndexError:
+        size = None
     return size
 
 
