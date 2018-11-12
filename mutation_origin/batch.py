@@ -238,7 +238,7 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
 @click.pass_context
 def xgboost_train(ctx, training_path, output_path, label_col, seed,
              max_flank, model_range, proximal, usegc, strategy,
-             alpha_options, n_jobs, overwrite):
+             n_jobs, overwrite):
     """batch xgboost training"""
     args = locals()
     args.pop('ctx')
