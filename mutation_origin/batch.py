@@ -328,7 +328,8 @@ def _get_predict_test_argsets(args, classifier_fns, test_data_paths,
         rep = data_rep_from_path("sample_data", path)
         data_mapped[(size, rep)] = path
 
-    classifier_fns = classifier_fns.splitlines()
+    if type(classifier_fns) == str:
+        classifier_fns = classifier_fns.splitlines()
 
     paired = []
     for path in classifier_fns:
