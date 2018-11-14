@@ -127,7 +127,7 @@ def get_classifier_label(classifier):
     elif name.startswith('xgb'):
         label = 'xgb'
     else:
-        raise ValueError("Unknown classifier type {name}")
+        raise ValueError(f"Unknown classifier type {name}")
     return label
 
 
