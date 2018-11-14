@@ -403,7 +403,6 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
     """predict labels for data"""
     LOGGER.log_args()
     classifier, feature_params, scaler = load_classifier(classifier_path)
-
     class_label = get_classifier_label(classifier)
     basename_class = get_basename(classifier_path)
     basename_data = get_basename(data_path)
@@ -427,7 +426,7 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
 
     start_time = time.time()
     # if NB, the score func name is different
-    if class_label == "nb":
+    if class_label in ("nb", "xgb"):
         classifier.decision_function = classifier.predict_proba
 
     fulldata = pandas.read_csv(data_path, sep='\t')
@@ -447,12 +446,12 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
             feat = scaler.transform(feat)
 
         predictions, scores = predict_origin(classifier, feat)
-        if class_label == "nb":
+        if class_label in ("nb", "xgb"):
             # each `score' is the probability of belong to either class
             # reduce to just the first class
-            scores = scores[:, 1]
+            scores = scores[:, 1].tolist()
         elif class_label == 'ocs':
-            scores = scores[:, 0]
+            scores = scores[:, 0].tolist()
 
         predictions = inverse_transform_response(predictions)
         result['predictions']['varid'].extend(list(ids))
