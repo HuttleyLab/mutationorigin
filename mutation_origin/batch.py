@@ -25,7 +25,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _size_range, _model_range,
                                  _test_data_paths, _max_flank, _verbose,
-                                 _strategy)
+                                 _strategy, _flank_sizes)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
@@ -103,7 +103,7 @@ def MakeDims(min_val=1, max_val=None):
 
 
 def get_train_kwarg_sets(training_path, output_path, max_flank,
-                         model_range, usegc, proximal, args):
+                         flank_sizes, model_range, usegc, proximal, args):
     """standadrised generation of kwargs for train algorithms"""
     get_dims = {'upto1': MakeDims(1, 1),
                 'upto2': MakeDims(1, 2),
@@ -112,6 +112,7 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
     start_flank = {'FS': 2}.get(model_range, 0)
     parameterisations = flank_dim_combinations(max_flank=max_flank,
                                                start_flank=start_flank,
+                                               flank_sizes=flank_sizes,
                                                get_dims=get_dims)
 
     # find all the training data
@@ -155,6 +156,7 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
 @_label_col
 @_seed
 @_max_flank
+@_flank_sizes
 @_model_range
 @_proximal
 @_usegc
@@ -164,17 +166,18 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
 @_overwrite
 @click.pass_context
 def lr_train(ctx, training_path, output_path, label_col, seed,
-             max_flank, model_range, proximal,
+             max_flank, flank_sizes, model_range, proximal,
              usegc, c_values, penalty_options, n_jobs, overwrite):
     """batch logistic regression training"""
     args = locals()
     args.pop('ctx')
     args.pop("n_jobs")
     args.pop("max_flank")
+    args.pop("flank_sizes")
     args.pop("model_range")
 
     arg_sets = get_train_kwarg_sets(training_path, output_path,
-                                    max_flank, model_range,
+                                    max_flank, flank_sizes, model_range,
                                     usegc, proximal, args)
 
     if n_jobs > 1:
@@ -193,6 +196,7 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
 @_label_col
 @_seed
 @_max_flank
+@_flank_sizes
 @_model_range
 @_proximal
 @_usegc
@@ -201,17 +205,18 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
 @_overwrite
 @click.pass_context
 def nb_train(ctx, training_path, output_path, label_col, seed,
-             max_flank, model_range, proximal, usegc,
+             max_flank, flank_sizes, model_range, proximal, usegc,
              alpha_options, n_jobs, overwrite):
     """batch naive bayes training"""
     args = locals()
     args.pop('ctx')
     args.pop("n_jobs")
     args.pop("max_flank")
+    args.pop("flank_sizes")
     args.pop("model_range")
 
     arg_sets = get_train_kwarg_sets(training_path, output_path,
-                                    max_flank, model_range,
+                                    max_flank, flank_sizes, model_range,
                                     usegc, proximal, args)
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
@@ -229,6 +234,7 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
 @_label_col
 @_seed
 @_max_flank
+@_flank_sizes
 @_model_range
 @_proximal
 @_usegc
@@ -236,18 +242,19 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
 @_n_jobs
 @_overwrite
 @click.pass_context
-def xgboost_train(ctx, training_path, output_path, label_col, seed,
-             max_flank, model_range, proximal, usegc, strategy,
-             n_jobs, overwrite):
+def xgboost_train(ctx, training_path, output_path, label_col, seed, max_flank,
+                  flank_sizes, model_range, proximal, usegc, strategy,
+                  n_jobs, overwrite):
     """batch xgboost training"""
     args = locals()
     args.pop('ctx')
     args.pop("n_jobs")
     args.pop("max_flank")
+    args.pop("flank_sizes")
     args.pop("model_range")
 
     arg_sets = get_train_kwarg_sets(training_path, output_path,
-                                    max_flank, model_range,
+                                    max_flank, flank_sizes, model_range,
                                     usegc, proximal, args)
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
@@ -265,23 +272,26 @@ def xgboost_train(ctx, training_path, output_path, label_col, seed,
 @_label_col
 @_seed
 @_max_flank
+@_flank_sizes
 @_model_range
 @_proximal
 @_usegc
 @_n_jobs
 @_overwrite
 @click.pass_context
-def ocs_train(ctx, training_path, output_path, label_col, seed,
-              max_flank, model_range, proximal, usegc, n_jobs, overwrite):
+def ocs_train(ctx, training_path, output_path, label_col, seed, max_flank,
+              flank_sizes, model_range, proximal, usegc, n_jobs, overwrite):
     """batch one class SVM training"""
     args = locals()
     args.pop('ctx')
     args.pop("n_jobs")
     args.pop("max_flank")
+    args.pop("flank_sizes")
     args.pop("model_range")
 
     arg_sets = get_train_kwarg_sets(training_path, output_path, max_flank,
-                                    model_range, usegc, proximal, args)
+                                    flank_sizes, model_range, usegc, proximal,
+                                    args)
     if n_jobs > 1:
         parallel.use_multiprocessing(n_jobs)
 
@@ -429,6 +439,8 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
     paired = []
     for path in predict_fns:
         size = sample_size_from_path(path)
+        if verbose:
+            print(path, size)
         size = f"{size // 1000}k"
         rep = data_rep_from_path("train", path)
         featdir = feature_set_from_path(path)

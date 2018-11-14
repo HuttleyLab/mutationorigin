@@ -106,7 +106,6 @@ def load_classifier(path):
     return classifier, feature_params, scaler
 
 
-
 def get_basename(path):
     """returns a file basename without the suffixes"""
     bn = os.path.basename(path)
@@ -143,10 +142,12 @@ def dirname_from_features(features):
     return dirname
 
 
-def flank_dim_combinations(max_flank=4, start_flank=0, get_dims=None):
+def flank_dim_combinations(max_flank=4, start_flank=0, flank_sizes=None,
+                           get_dims=None):
     """returns flank_size/dim combinations"""
     combinations = []
-    for fz in range(start_flank, max_flank):
+    flank_sizes = flank_sizes or range(start_flank, max_flank)
+    for fz in flank_sizes:
         if fz == 0:
             combinations.append(dict(flank_size=fz))
             continue
