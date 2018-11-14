@@ -63,10 +63,10 @@ _numreps = click.option('-n', '--numreps', required=True, type=int,
                         ' process for.')
 _label_col = click.option('-l', '--label_col', default='response',
                           help='Table column corresponding to response label.')
-_training_path = click.option('-tp', '--training_path',
+_training_path = click.option('-tp', '--training_path', required=True,
                               type=click.Path(exists=True),
                               help='Input file containing training data.')
-_data_path = click.option('-dp', '--data_path',
+_data_path = click.option('-dp', '--data_path', required=True,
                           type=click.Path(exists=True),
                           help='Input file containing testing data.')
 _c_values = click.option('-C', '--c_values',
@@ -84,10 +84,10 @@ _alpha_options = click.option('-a', '--alpha_options',
                               help='Alpha values for model')
 _n_jobs = click.option('-N', '--n_jobs', type=int, default=1,
                        help="num parallel jobs via joblib")
-_classifier_path = click.option('-cp', '--classifier_path',
+_classifier_path = click.option('-cp', '--classifier_path', required=True,
                                 type=click.Path(exists=True),
                                 help="path to pickle format classifier")
-_predictions_path = click.option('-pp', '--predictions_path',
+_predictions_path = click.option('-pp', '--predictions_path', required=True,
                                  type=click.Path(exists=True),
                                  help="path to output from predict")
 _overwrite = click.option('-O', '--overwrite',
