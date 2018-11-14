@@ -3,7 +3,7 @@ from sklearn.naive_bayes import BernoulliNB
 from sklearn.svm import OneClassSVM
 from sklearn.model_selection import ShuffleSplit, GridSearchCV
 from xgboost_tuner.tuner import tune_xgb_params
-from xgboost import XGBClassifier
+from xgboost import DMatrix, train as xgb_train
 
 
 __author__ = "Gavin Huttley"
@@ -88,7 +88,7 @@ def xgboost(feat, resp, seed, strategy, n_jobs, verbose):
         subsample_max=1.0)
     kwargs = {'incremental': incr_search_kwargs,
               'randomized': rand_search_kwargs}[strategy]
-    best_params, history = tune_xgb_params(verbosity_level=0, **kwargs)
-    booster = XGBClassifier()
-    booster.set_params(**best_params)
+    best_params, history = tune_xgb_params(verbosity_level=False, **kwargs)
+    dmat = DMatrix(feat, label=resp)
+    booster = xgb_train(best_params, dmat)
     return booster
