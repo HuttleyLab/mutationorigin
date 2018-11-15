@@ -76,7 +76,7 @@ def sample_data(ctx, enu_path, germline_path, output_path, seed,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_sample,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -188,7 +188,7 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_lr_train,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -226,7 +226,7 @@ def nb_train(ctx, training_path, output_path, label_col, seed,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_nb_train,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -264,7 +264,7 @@ def xgboost_train(ctx, training_path, output_path, label_col, seed, max_flank,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_xgboost,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -300,7 +300,7 @@ def ocs_train(ctx, training_path, output_path, label_col, seed, max_flank,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_ocs_train,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -400,7 +400,7 @@ def predict(ctx, classifier_paths, test_data_paths, output_path,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_predict,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -466,7 +466,7 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
     total = len(arg_sets)
     gen = parallel.imap(lambda args: ctx.invoke(mutori_performance,
                                                 **args), arg_sets)
-    for r in tqdm(gen, total=total):
+    for r in tqdm(gen, ncols=80, total=total):
         pass
 
 
@@ -501,7 +501,7 @@ def collate(base_path, output_path, overwrite):
 
     records = []
     keys = set()
-    for fn in tqdm(stat_fns):
+    for fn in tqdm(stat_fns, ncols=80):
         LOGGER.input_file(fn)
         data = load_json(fn)
         row = {"stat_path": fn, "classifier_path": data["classifier_path"],

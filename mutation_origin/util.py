@@ -218,7 +218,7 @@ def summary_stat_table(table, factors):
     """returns summary statistics for classifier, feature set combination"""
     distinct = table.distinct_values(factors)
     rows = []
-    for comb in tqdm(distinct):
+    for comb in tqdm(distinct, ncols=80):
         subtable = table.filtered(lambda x: tuple(x) == tuple(comb),
                                   columns=factors)
         aurocs = numpy.array(subtable.tolist('auc'))
