@@ -135,8 +135,10 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
             params.update(args)
             dim = params.get("feature_dim")
             flank_size = params["flank_size"]
-            if dim is None or dim < 2 or flank_size < 2:
+            if (dim is None or dim < 2 or flank_size < 2 or
+                    dim == flank_size * 2):
                 # prox only sensible with dim >= 2, flank_size > 1
+                # dim < 2 * flank_size
                 params["proximal"] = False
 
             params['training_path'] = train_path
