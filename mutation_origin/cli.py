@@ -437,7 +437,7 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
     result['classifier_path'] = classifier_path
     result['predictions'] = defaultdict(list)
     total = fulldata.shape[0] // 2000
-    pbar = tqdm(iter_indices(fulldata.shape[0], block_size=2000), total=total)
+    pbar = tqdm(iter_indices(fulldata.shape[0], block_size=2000), ncols=80, total=total)
     for indices in pbar:
         data = fulldata.iloc[indices]
         ids, resp, feat, n_dims, names = data_to_numeric(data,
