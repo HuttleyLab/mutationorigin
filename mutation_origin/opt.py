@@ -21,7 +21,8 @@ def _make_number(ctx, param, value):
 
 
 def _make_num_series(ctx, param, value):
-    value = [_make_number(None, None, c) for c in value.split(',')]
+    if value is not None:
+        value = [_make_number(None, None, c) for c in value.split(',')]
     return value
 
 
