@@ -1,6 +1,7 @@
 """command line interface for batched runs mutation_origin"""
 from warnings import filterwarnings
 from pprint import pprint
+import glob
 import os
 os.environ['DONT_USE_MPI'] = "1"
 filterwarnings("ignore", ".*Not using MPI.*")
@@ -423,41 +424,62 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
     args.pop("predictions_path")
     args.pop("output_path")
 
-    test_pattern = FILENAME_PATTERNS["sample_data"]["test"]
     predict_pattern = FILENAME_PATTERNS["predict"]
-    test_fns = exec_command(f"find {test_data_paths} -name {test_pattern}")
+    if '*' not in test_data_paths:
+        test_pattern = FILENAME_PATTERNS["sample_data"]["test"]
+        test_fns = exec_command(f"find {test_data_paths} -name {test_pattern}")
+        data_fns = test_fns.splitlines()
 
-    data_fns = test_fns.splitlines()
-    data_mapped = {}
-    for path in data_fns:
-        size = sample_size_from_path(path)
-        size = f"{size // 1000}k"
-        rep = data_rep_from_path("sample_data", path)
-        data_mapped[(size, rep)] = path
+        data_mapped = {}
+        for path in data_fns:
+            size = sample_size_from_path(path)
+            size = f"{size // 1000}k"
+            rep = data_rep_from_path("sample_data", path)
+            data_mapped[(size, rep)] = path
 
-    predict_fns = exec_command(f'find {predictions_path} -name'
-                               f' {predict_pattern}')
-    predict_fns = predict_fns.splitlines()
-    paired = []
-    for path in predict_fns:
-        size = sample_size_from_path(path)
-        if verbose:
-            print(path, size)
-        size = f"{size // 1000}k"
-        rep = data_rep_from_path("train", path)
-        featdir = feature_set_from_path(path)
-        paired.append(dict(predictions_path=path,
-                           data_path=data_mapped[(size, rep)],
-                           size=size,
-                           featdir=featdir))
+        predict_fns = exec_command(f'find {predictions_path} -name'
+                                   f' {predict_pattern}')
+        predict_fns = predict_fns.splitlines()
+        paired = []
+        for path in predict_fns:
+            paths = dict(predictions_path=path)
+            size = sample_size_from_path(path)
+            size = f"{size // 1000}k"
+            rep = data_rep_from_path("train", path)
+            featdir = feature_set_from_path(path)
+            paths.update(dict(data_path=data_mapped[(size, rep)],
+                              size=size,
+                              featdir=featdir))
+            paired.append(paths)
+    else:
+        data_fns = glob.glob(test_data_paths)
+        data_mapped = {}
+        for fn in data_fns:
+            bn = os.path.basename(fn).replace(".tsv.gz", "")
+            data_mapped[bn] = fn
+
+        predict_fns = exec_command(f'find {predictions_path} -name'
+                                   f' {predict_pattern}')
+        predict_fns = predict_fns.splitlines()
+        paired = []
+        for path in predict_fns:
+            components = path.split('-')
+            for key in data_mapped:
+                if key in components:
+                    paired.append(dict(predictions_path=path,
+                                       data_path=data_mapped[key]))
+                    break
 
     arg_sets = []
     for pair in paired:
         arg_group = args.copy()
-        size = pair.pop('size')
-        featdir = pair.pop('featdir')
+        try:
+            size = pair.pop('size')
+            featdir = pair.pop('featdir')
+            arg_group['output_path'] = os.path.join(output_path, size, featdir)
+        except KeyError:
+            arg_group['output_path'] = output_path
         arg_group.update(pair)
-        arg_group['output_path'] = os.path.join(output_path, size, featdir)
         arg_sets.append(arg_group)
 
     if n_jobs > 1:
