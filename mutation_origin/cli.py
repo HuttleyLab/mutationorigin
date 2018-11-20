@@ -21,9 +21,11 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _training_path, _c_values, _penalty_options,
                                  _n_jobs, _classifier_path, _data_path,
                                  _predictions_path, _alpha_options,
-                                 _overwrite, _verbose, _strategy)
+                                 _overwrite, _verbose, _class_prior,
+                                 _strategy)
 from mutation_origin.preprocess import data_to_numeric
-from mutation_origin.encoder import get_scaler, inverse_transform_response
+from mutation_origin.encoder import (get_scaler, inverse_transform_response,
+                                     transform_response)
 from mutation_origin.classify import (logistic_regression, one_class_svm,
                                       predict_origin, naive_bayes, xgboost)
 from mutation_origin.util import (dump_json, load_predictions,
@@ -214,12 +216,13 @@ def lr_train(training_path, output_path, label_col, seed,
 @_proximal
 @_usegc
 @_alpha_options
+@_class_prior
 @_n_jobs
 @_overwrite
 @_verbose
 def nb_train(training_path, output_path, label_col, seed,
              flank_size, feature_dim, proximal,
-             usegc, alpha_options, n_jobs, overwrite, verbose):
+             usegc, alpha_options, class_prior, n_jobs, overwrite, verbose):
     """Naive Bayes training, validation, dumps optimal model"""
     if not seed:
         seed = int(time.time())
@@ -243,6 +246,12 @@ def nb_train(training_path, output_path, label_col, seed,
     LOGGER.input_file(training_path)
 
     start_time = time.time()
+    if class_prior is not None:
+        class_labels = list(class_prior)
+        encoded = transform_response(class_labels)
+        ordered = sorted(zip(encoded, class_labels))
+        class_prior = [class_prior[l] for _, l in ordered]
+
     _, resp, feat, n_dims, names = data_to_numeric(training_path,
                                                    label_col, flank_size,
                                                    feature_dim, proximal,
@@ -252,7 +261,8 @@ def nb_train(training_path, output_path, label_col, seed,
         # we need to scale the data
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
-    classifier = naive_bayes(feat, resp, seed, alpha_options, n_jobs)
+    classifier = naive_bayes(feat, resp, seed, alpha_options,
+                             class_prior=class_prior, n_jobs=n_jobs)
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
     result = dict(classifier=classifier.best_estimator_, betas=betas)
     result['feature_params'] = dict(feature_dim=feature_dim,

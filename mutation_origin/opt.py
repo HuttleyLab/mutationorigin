@@ -1,4 +1,5 @@
 import click
+import numpy
 
 __author__ = "Gavin Huttley"
 __copyright__ = "Copyright 2014, Gavin Huttley"
@@ -24,6 +25,20 @@ def _make_num_series(ctx, param, value):
     if value is not None:
         value = [_make_number(None, None, c) for c in value.split(',')]
     return value
+
+
+def _make_prob_series(ctx, param, value):
+    if value is not None:
+        values = dict(v.split('=') for v in value.split(','))
+        for key, value in values.items():
+            values[key] = float(value)
+
+        eps = numpy.finfo(float).eps
+        if abs(1 - sum(values.values())) > eps:
+            raise ValueError("prob series should sum to 1")
+    else:
+        values = value
+    return values
 
 
 _seed = click.option('-s', '--seed', type=int, default=None,
@@ -112,7 +127,8 @@ _classifier_paths = click.option("-cp", "--classifier_paths",
 _test_data_paths = click.option("-tp", "--test_data_paths",
                                 type=click.Path(),
                                 required=True,
-                                help="basedir/or glob pattern identifying data for testing.")
+                                help="basedir/or glob pattern identifying "
+                                "data for testing.")
 _max_flank = click.option('-x', '--max_flank',
                           type=click.IntRange(1, 33),
                           default=4,
@@ -130,3 +146,8 @@ _strategy = click.option('-sy', '--strategy',
                                             'incremental']),
                          default='incremental',
                          help="XGBoost tuner search strategy")
+_class_prior = click.option("-pr", "--class_prior",
+                            default=None,
+                            callback=_make_prob_series,
+                            help="Prior class probabilities for NB "
+                            "classifier. e.g. e=0.99,g=0.01")

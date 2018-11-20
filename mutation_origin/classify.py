@@ -36,11 +36,11 @@ def logistic_regression(feat, resp, seed, c_values, penalty_options, n_jobs):
     return classifier
 
 
-def naive_bayes(feat, resp, seed, alphas, n_jobs):
+def naive_bayes(feat, resp, seed, alphas, class_prior=None, n_jobs=1):
     """fits a logistic regression classifier using a grid search with CV"""
     shuffle_split = ShuffleSplit(n_splits=1, test_size=0.5, random_state=seed)
     param_grid = {'alpha': alphas}
-    nb = BernoulliNB()
+    nb = BernoulliNB(fit_prior=class_prior is None, class_prior=class_prior)
     classifier = GridSearchCV(estimator=nb, param_grid=param_grid,
                               scoring='roc_auc',
                               cv=shuffle_split,

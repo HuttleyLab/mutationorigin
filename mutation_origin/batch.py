@@ -26,7 +26,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _size_range, _model_range,
                                  _test_data_paths, _max_flank, _verbose,
-                                 _strategy, _flank_sizes)
+                                 _strategy, _flank_sizes, _class_prior)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
@@ -204,12 +204,13 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
 @_proximal
 @_usegc
 @_alpha_options
+@_class_prior
 @_n_jobs
 @_overwrite
 @click.pass_context
 def nb_train(ctx, training_path, output_path, label_col, seed,
              max_flank, flank_sizes, model_range, proximal, usegc,
-             alpha_options, n_jobs, overwrite):
+             alpha_options, class_prior, n_jobs, overwrite):
     """batch naive bayes training"""
     args = locals()
     args.pop('ctx')
