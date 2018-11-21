@@ -136,6 +136,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 @main.command()
@@ -204,6 +205,7 @@ def lr_train(training_path, output_path, label_col, seed,
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 @main.command()
@@ -278,6 +280,7 @@ def nb_train(training_path, output_path, label_col, seed,
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 @main.command()
@@ -346,6 +349,7 @@ def xgboost_train(training_path, output_path, label_col, seed,
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 @main.command()
@@ -401,6 +405,7 @@ def ocs_train(training_path, output_path, label_col, seed,
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 @main.command()
@@ -474,6 +479,7 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
     duration = time.time() - start_time
     LOGGER.log_message("%.2f" % (duration / 60.),
                        label="run duration (minutes)")
+    LOGGER.shutdown()
 
 
 # def performance -> produces summary stats on trained classifiers
@@ -521,6 +527,7 @@ def performance(data_path, predictions_path, output_path, label_col,
     result["classifier_path"] = classifier_path
     result["classifier_label"] = label
     dump_json(outpath, result)
+    LOGGER.shutdown()
 
 
 if __name__ == "__main__":
