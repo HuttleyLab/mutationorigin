@@ -236,3 +236,13 @@ def iter_indices(total, block_size):
         end = min(total, start + block_size)
         indices = range(start, end)
         yield list(indices)
+
+
+def skip_path(exclude_paths, path):
+    """returns True if path has a match to exclude paths"""
+    result = False
+    for ex in exclude_paths:
+        if ex in path:
+            result = True
+            break
+    return result

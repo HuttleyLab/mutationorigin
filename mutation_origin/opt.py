@@ -151,3 +151,7 @@ _class_prior = click.option("-pr", "--class_prior",
                             callback=_make_prob_series,
                             help="Prior class probabilities for NB "
                             "classifier. e.g. e=0.99,g=0.01")
+_excludes = click.option("-ex", "--exclude_paths",
+                            default=None,
+                            type=click.Path(),
+                            help="Paths to exclude, comma separated")

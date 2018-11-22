@@ -26,13 +26,15 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _size_range, _model_range,
                                  _test_data_paths, _max_flank, _verbose,
-                                 _strategy, _flank_sizes, _class_prior)
+                                 _strategy, _flank_sizes, _class_prior,
+                                 _excludes)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
                                   data_rep_from_path,
                                   feature_set_from_path, load_json,
-                                  summary_stat_table, model_name_from_features)
+                                  summary_stat_table, model_name_from_features,
+                                  skip_path)
 from scitrack import CachingLogger
 
 LOGGER = CachingLogger()
@@ -499,8 +501,9 @@ def performance(ctx, test_data_paths, predictions_path, output_path, label_col,
               help='Base directory containing all'
               ' files produced by performance.')
 @_output_path
+@_excludes
 @_overwrite
-def collate(base_path, output_path, overwrite):
+def collate(base_path, output_path, exclude_paths, overwrite):
     """collates all classifier performance stats and writes
     to a single tsv file"""
     LOGGER.log_args()
@@ -524,7 +527,14 @@ def collate(base_path, output_path, overwrite):
 
     records = []
     keys = set()
+    exclude_paths = [] if exclude_paths is None else exclude_paths.split(',')
+    num_skipped = 0
     for fn in tqdm(stat_fns, ncols=80):
+        if skip_path(exclude_paths, fn):
+            num_skipped += 1
+            LOGGER.log_message(fn, label="SKIPPED FILE")
+            continue
+
         LOGGER.input_file(fn)
         data = load_json(fn)
         row = {"stat_path": fn, "classifier_path": data["classifier_path"],
@@ -553,6 +563,9 @@ def collate(base_path, output_path, overwrite):
     outpath = os.path.join(output_path, "summary_statistics.tsv.gz")
     summary.write(outpath)
     LOGGER.output_file(outpath)
+    if num_skipped:
+        click.secho("Skipped %d files that matched exclude_paths" %
+                    num_skipped, fg='red')
 
 
 if __name__ == '__main__':
