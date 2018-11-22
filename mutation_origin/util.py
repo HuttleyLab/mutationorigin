@@ -196,15 +196,15 @@ def feature_set_from_path(path):
 def model_name_from_features(flank, dim, usegc, proximal):
     """returns the model name from a feature set"""
     if flank == 0:
-        model = ["MD"]
+        model = ["M"]
     elif flank and dim == 1:
-        model = ["MD", "I"]
+        model = ["M", "I"]
     elif flank and dim == 2 * flank:
         assert not proximal
         model = ["FS"]
     elif dim > 1:
         prox = "p" if proximal else ""
-        model = ["MD", "I"] + [f"{i}D{prox}" for i in range(2, dim + 1)]
+        model = ["M", "I"] + [f"{i}D{prox}" for i in range(2, dim + 1)]
     else:
         raise ValueError("Unexpected model", flank, flank)
     if usegc:
