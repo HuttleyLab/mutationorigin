@@ -2,6 +2,7 @@
 from warnings import filterwarnings
 
 filterwarnings("ignore", "Data with input dtype int8 was converted")
+filterwarnings("ignore", "Precision and F-score")
 
 import os
 import time
