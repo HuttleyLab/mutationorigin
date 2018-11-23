@@ -216,16 +216,25 @@ def model_name_from_features(flank, dim, usegc, proximal):
 
 def summary_stat_table(table, factors):
     """returns summary statistics for classifier, feature set combination"""
+    fscore_cols = [c for c in table.header if c.startswith('fscore')]
     distinct = table.distinct_values(factors)
     rows = []
     for comb in tqdm(distinct, ncols=80):
         subtable = table.filtered(lambda x: tuple(x) == tuple(comb),
                                   columns=factors)
         aurocs = numpy.array(subtable.tolist('auc'))
-        rows.append(list(comb) + [aurocs.mean(), aurocs.std(ddof=1)])
+        row = list(comb) + [aurocs.mean(), aurocs.std(ddof=1)]
+        for col in fscore_cols:
+            data = numpy.array(subtable.tolist(col))
+            row.append(data.mean())
+            row.append(data.std(ddof=1))
+        rows.append(row)
 
-    table = LoadTable(header=list(factors) +
-                      ["mean_auc", "std_auc"], rows=rows)
+    header = list(factors) + ["mean_auc", "std_auc"]
+    for col in fscore_cols:
+        header.extend([f'mean_{col}', f'std_{col}'])
+
+    table = LoadTable(header=header, rows=rows)
     table = table.sorted(reverse="mean_auc")
     return table
 

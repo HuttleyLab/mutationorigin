@@ -537,8 +537,12 @@ def collate(base_path, output_path, exclude_paths, overwrite):
 
         LOGGER.input_file(fn)
         data = load_json(fn)
+        labels = data['classification_report']['labels']
+        fscores = data['classification_report']['f-score']
         row = {"stat_path": fn, "classifier_path": data["classifier_path"],
-               "auc": data["auc"], "algorithm": data["classifier_label"]}
+               "auc": data["auc"], "algorithm": data["classifier_label"],
+               f"fscore({labels[0]})": fscores[0],
+               f"fscore({labels[1]})": fscores[1]}
         row.update(data["feature_params"])
         keys.update(row.keys())
         records.append(row)
