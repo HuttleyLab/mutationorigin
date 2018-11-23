@@ -166,7 +166,7 @@ def lr_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
-    outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-lr.pkl.gz")
     if os.path.exists(outpath) and not overwrite:
         if verbose > 1:
             click.secho(f"Skipping. {outpath} exists. "
@@ -235,7 +235,7 @@ def nb_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
-    outpath = os.path.join(output_path, f"{basename}-classifier-nb.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-nb.pkl.gz")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-nb.log")
     if os.path.exists(outpath) and not overwrite:
@@ -309,7 +309,7 @@ def xgboost_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
-    outpath = os.path.join(output_path, f"{basename}-classifier-xgb.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-xgb.pkl.gz")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-xgb.log")
     if os.path.exists(outpath) and not overwrite:
@@ -374,7 +374,7 @@ def ocs_train(training_path, output_path, label_col, seed,
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
-    outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl")
+    outpath = os.path.join(output_path, f"{basename}-classifier-ocs.pkl.gz")
     logfile_path = os.path.join(output_path,
                                 f"logs/{basename}-training-ocs.log")
     if os.path.exists(outpath) and not overwrite:

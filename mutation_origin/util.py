@@ -23,7 +23,7 @@ __status__ = "Development"
 
 FILENAME_PATTERNS = {"sample_data": dict(train="train-*.tsv.gz",
                                          test="test-*.tsv.gz"),
-                     "train": "*-classifier-*.pkl",
+                     "train": "*-classifier-*.pkl*",
                      "predict": "*-predicted-*.json.gz",
                      "performance": "*-performance.json.gz"}
 MUTATION_DIRECTIONS = ('AtoC', 'AtoG', 'AtoT', 'CtoA', 'CtoG', 'CtoT',
