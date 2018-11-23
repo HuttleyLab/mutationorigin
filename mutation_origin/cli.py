@@ -390,13 +390,14 @@ def ocs_train(training_path, output_path, label_col, seed,
     _, _, feat, n_dims, names = data_to_numeric(training_path,
                                                 label_col, flank_size,
                                                 feature_dim, proximal,
+                                                usegc=usegc,
                                                 one_class='g')
 
     classifier = one_class_svm(feat, seed)
     result = dict(classifier=classifier)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal,
-                                    usegc=False)  # key added for consistency
+                                    usegc=usegc)
 
     with open(outpath, 'wb') as clf_file:
         pickle.dump(result, clf_file)
