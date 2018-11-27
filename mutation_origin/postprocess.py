@@ -28,7 +28,7 @@ def measure_performance(orig, predicted, label_col):
     new = orig.join(predicted)
 
     response_labels = inverse_transform_response([-1, 1])
-    expect = transform_response(new['response'])
+    expect = transform_response(new[label_col])
     predict = transform_response(new['predicted'])
     pr, re, fs, sup = precision_recall_fscore_support(expect,
                                                       predict)

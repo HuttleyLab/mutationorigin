@@ -414,9 +414,11 @@ def ocs_train(training_path, output_path, label_col, seed,
 @_classifier_path
 @_data_path
 @_output_path
+@_label_col
 @_overwrite
 @_verbose
-def predict(classifier_path, data_path, output_path, overwrite, verbose):
+def predict(classifier_path, data_path, output_path, label_col, overwrite,
+            verbose):
     """predict labels for data"""
     LOGGER.log_args()
     classifier, feature_params, scaler = load_classifier(classifier_path)
@@ -459,6 +461,7 @@ def predict(classifier_path, data_path, output_path, overwrite, verbose):
     for indices in pbar:
         data = fulldata.iloc[indices]
         ids, resp, feat, n_dims, names = data_to_numeric(data,
+                                                         label_col=label_col,
                                                          **feature_params)
         if scaler:
             feat = scaler.transform(feat)
