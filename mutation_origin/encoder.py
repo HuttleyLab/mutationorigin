@@ -44,7 +44,7 @@ def transformed(features, labels, direction_transform=None):
 
 def onehot(data, n_values):
     """encode as one-hot encoding"""
-    encoder = OneHotEncoder(n_values=n_values, dtype=np.int8)
+    encoder = OneHotEncoder(categories=[range(v) for v in n_values], dtype=np.int8)
     result = encoder.fit_transform(data).toarray()
     result[result == 0] = -1
     return result

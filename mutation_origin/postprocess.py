@@ -1,7 +1,8 @@
 import pandas
 from sklearn.metrics import (confusion_matrix,
                              roc_auc_score, precision_recall_fscore_support,
-                             precision_recall_curve)
+                             precision_recall_curve, average_precision_score,
+                             balanced_accuracy_score)
 from mutation_origin.encoder import (inverse_transform_response,
                                      transform_response)
 
@@ -43,7 +44,10 @@ def measure_performance(orig, predicted, label_col):
                                  columns=response_labels)
     cf_matrix = cf_matrix.rename_axis('actual / predicted', axis=1)
     result["confusion_matrix"] = cf_matrix.to_dict(orient='list')
+    result['balanced_accuracy'] = balanced_accuracy_score(expect, predict)
     result["auc"] = roc_auc_score(expect, new['scores'])
+    result["mean_precision"] = average_precision_score(expect, new['scores'])
+
     precision, recall, thresholds = precision_recall_curve(
         expect, new['scores'])
     result["prcurve"] = dict(precision=precision.tolist(),

@@ -541,8 +541,10 @@ def collate(base_path, output_path, exclude_paths, overwrite):
         fscores = data['classification_report']['f-score']
         row = {"stat_path": fn, "classifier_path": data["classifier_path"],
                "auc": data["auc"], "algorithm": data["classifier_label"],
+               "mean_precision": data["mean_precision"],
                f"fscore({labels[0]})": fscores[0],
-               f"fscore({labels[1]})": fscores[1]}
+               f"fscore({labels[1]})": fscores[1],
+               'balanced_accuracy': data['balanced_accuracy']}
         row.update(data["feature_params"])
         keys.update(row.keys())
         records.append(row)

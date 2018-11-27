@@ -223,14 +223,20 @@ def summary_stat_table(table, factors):
         subtable = table.filtered(lambda x: tuple(x) == tuple(comb),
                                   columns=factors)
         aurocs = numpy.array(subtable.tolist('auc'))
-        row = list(comb) + [aurocs.mean(), aurocs.std(ddof=1)]
+        mean_prec = numpy.array(subtable.tolist('mean_precision'))
+        accuracy = numpy.array(subtable.tolist('balanced_accuracy'))
+        row = list(comb) + [aurocs.mean(), aurocs.std(ddof=1),
+                            mean_prec.mean(), mean_prec.std(ddof=1),
+                            accuracy.mean(), accuracy.std(ddof=1)]
         for col in fscore_cols:
             data = numpy.array(subtable.tolist(col))
             row.append(data.mean())
             row.append(data.std(ddof=1))
         rows.append(row)
 
-    header = list(factors) + ["mean_auc", "std_auc"]
+    header = list(factors) + ["mean_auc", "std_auc", "mean_ap", "std_ap",
+                              'mean_balanced_accuracy',
+                              'std_balanced_accuracy']
     for col in fscore_cols:
         header.extend([f'mean_{col}', f'std_{col}'])
 
@@ -255,3 +261,4 @@ def skip_path(exclude_paths, path):
             result = True
             break
     return result
+
