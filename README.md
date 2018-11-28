@@ -73,6 +73,10 @@ These are saved in python's `pickle` format. Also saved are attributes defining 
 
 Stored in `json` format.
 
+#### Collated output
+
+Done via the `mutori_batch collate` command, produces tab separated files of key performance metrics and summary statistics of each of those.
+
 ## License
 
 The BSD 3-clause license is included in this repo as well, refer to `license.txt`
