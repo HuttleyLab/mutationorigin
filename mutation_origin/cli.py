@@ -71,6 +71,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
     if seed is None:
         seed = int(time.time())
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
 
     # set the random number seed
     np_seed(seed)
@@ -163,6 +164,8 @@ def lr_train(training_path, output_path, label_col, seed,
 
     np_seed(seed)
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
+
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
@@ -232,6 +235,7 @@ def nb_train(training_path, output_path, label_col, seed,
 
     np_seed(seed)
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
@@ -306,6 +310,7 @@ def xgboost_train(training_path, output_path, label_col, seed,
 
     np_seed(seed)
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
     os.makedirs(output_path, exist_ok=True)
 
     basename = get_basename(training_path)
@@ -370,6 +375,7 @@ def ocs_train(training_path, output_path, label_col, seed,
     if seed is None:
         seed = int(time.time())
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
     start_time = time.time()
     os.makedirs(output_path, exist_ok=True)
 
@@ -421,6 +427,7 @@ def predict(classifier_path, data_path, output_path, label_col, overwrite,
             verbose):
     """predict labels for data"""
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
     classifier, feature_params, scaler = load_classifier(classifier_path)
     class_label = get_classifier_label(classifier)
     basename_class = get_basename(classifier_path)
@@ -500,6 +507,7 @@ def performance(data_path, predictions_path, output_path, label_col,
                 overwrite, verbose):
     """produce measures of classifier performance"""
     LOGGER.log_args()
+    LOGGER.log_versions(['sklearn', 'numpy'])
     if not (data_path or predictions_path):
         click.secho("Need data sets!", fg="red")
         exit()
