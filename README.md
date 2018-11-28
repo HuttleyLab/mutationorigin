@@ -8,12 +8,12 @@ Inside a `conda` environment, run pip on the downloaded zip file.
 
 ```$ pip install mutori.zip```
 
-## The `mutori` command
+## The `mutori` and `mutori_batch` commands
 
-Installation creates a `mutori` command line script. Command line help shows
+Installation creates `mutori` and `mutori_batch` command line scripts. Command line help for `mutori` shows
 
 ```
- $ mutori --help
+$ mutori
 Usage: mutori [OPTIONS] COMMAND [ARGS]...
 
   mutori -- for building and applying classifiers of mutation origin
@@ -22,13 +22,35 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  collect      collects all classifier performance stats and...
-  lr_train     logistic regression training, validation,...
-  nb_train     Naive Bayes training, validation, dumps...
-  ocs_train    one-class svm training for outlier detection
-  performance  produce measures of classifier performance
-  predict      predict labels for data
-  sample_data  creates train/test sample data
+  lr_train       logistic regression training, validation,...
+  nb_train       Naive Bayes training, validation, dumps...
+  ocs_train      one-class svm training for outlier detection
+  performance    produce measures of classifier performance
+  predict        predict labels for data
+  sample_data    creates train/test sample data
+  xgboost_train  Naive Bayes training, validation, dumps...
+```
+
+ Command line help for `mutori_batch` shows
+
+```
+$ mutori_batch 
+Usage: mutori_batch [OPTIONS] COMMAND [ARGS]...
+
+  mutori_batch -- batch execution of mutori subcommands
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  collate        collates all classifier performance stats and...
+  lr_train       batch logistic regression training
+  nb_train       batch naive bayes training
+  ocs_train      batch one class SVM training
+  performance    batch classifier performance assessment
+  predict        batch testing of classifiers
+  sample_data    batch creation training/testing sample data
+  xgboost_train  batch xgboost training
 ```
 
 ### Input and output data formats
