@@ -12,33 +12,33 @@ __status__ = "Development"
 
 
 def _make_number(ctx, param, value):
-    """converts a number to float/int"""
-    if value:
-        try:
-            value = int(value)
-        except ValueError:
-            value = float(value)
-    return value
+  """converts a number to float/int"""
+  if value:
+    try:
+      value = int(value)
+    except ValueError:
+      value = float(value)
+  return value
 
 
 def _make_num_series(ctx, param, value):
-    if value is not None:
-        value = [_make_number(None, None, c) for c in value.split(',')]
-    return value
+  if value is not None:
+    value = [_make_number(None, None, c) for c in value.split(',')]
+  return value
 
 
 def _make_prob_series(ctx, param, value):
-    if value is not None:
-        values = dict(v.split('=') for v in value.split(','))
-        for key, value in values.items():
-            values[key] = float(value)
+  if value is not None:
+    values = dict(v.split('=') for v in value.split(','))
+    for key, value in values.items():
+      values[key] = float(value)
 
-        eps = numpy.finfo(float).eps
-        if abs(1 - sum(values.values())) > eps:
-            raise ValueError("prob series should sum to 1")
-    else:
-        values = value
-    return values
+    eps = numpy.finfo(float).eps
+    if abs(1 - sum(values.values())) > eps:
+      raise ValueError("prob series should sum to 1")
+  else:
+    values = value
+  return values
 
 
 _seed = click.option('-s', '--seed', type=int, default=None,
@@ -149,9 +149,10 @@ _strategy = click.option('-sy', '--strategy',
 _class_prior = click.option("-pr", "--class_prior",
                             default=None,
                             callback=_make_prob_series,
-                            help="Prior class probabilities for NB "
-                            "classifier. e.g. e=0.99,g=0.01")
+                            help="Prior class probabilities "
+                            "e.g. e=0.99,g=0.01. When used with LR, used to "
+                            "compute prior correction.")
 _excludes = click.option("-ex", "--exclude_paths",
-                            default=None,
-                            type=click.Path(),
-                            help="Paths to exclude, comma separated")
+                         default=None,
+                         type=click.Path(),
+                         help="Paths to exclude, comma separated")

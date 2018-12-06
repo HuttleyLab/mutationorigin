@@ -6,6 +6,7 @@ from collections import defaultdict
 import click
 from tqdm import tqdm
 import pandas
+from numpy import log
 from numpy.random import seed as np_seed
 from scitrack import CachingLogger
 from sklearn.model_selection import train_test_split
@@ -416,15 +417,31 @@ def ocs_train(training_path, output_path, label_col, seed,
 @_data_path
 @_output_path
 @_label_col
+@_class_prior
 @_overwrite
 @_verbose
-def predict(classifier_path, data_path, output_path, label_col, overwrite,
-            verbose):
+def predict(classifier_path, data_path, output_path, label_col, class_prior,
+            overwrite, verbose):
     """predict labels for data"""
     LOGGER.log_args()
     LOGGER.log_versions(['sklearn', 'numpy'])
     classifier, feature_params, scaler = load_classifier(classifier_path)
     class_label = get_classifier_label(classifier)
+    if class_prior is not None and class_label == 'lr':
+        # https://stats.stackexchange.com/questions/117592/logistic-regression-prior-correction-at-test-time
+        # based on above and King and Zeng, we adjust the intercept term such
+        # that it is incremented by ln(p(1) / p(-1)) where p(1) is the prior
+        # of a 1 label, p(-1)=1-p(1)
+        class_labels = list(class_prior)
+        encoded = transform_response(class_labels)
+        ordered = sorted(zip(encoded, class_labels))
+        if 'e' in ordered[0]:
+            adj = log(class_prior['g'] / class_prior['e'])
+        else:
+            adj = log(class_prior['e'] / class_prior['g'])
+
+        classifier.intercept_ += adj
+
     basename_class = get_basename(classifier_path)
     basename_data = get_basename(data_path)
     basename = f"{basename_class}-{basename_data}"

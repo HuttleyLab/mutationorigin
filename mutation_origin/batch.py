@@ -372,11 +372,12 @@ def _get_predict_test_argsets(args, classifier_fns, test_data_paths,
 @_classifier_paths
 @_test_data_paths
 @_output_path
+@_class_prior
 @_overwrite
 @_n_jobs
 @click.pass_context
 def predict(ctx, classifier_paths, test_data_paths, output_path,
-            overwrite, n_jobs):
+            class_prior, overwrite, n_jobs):
     """batch testing of classifiers"""
     args = locals()
     args.pop('ctx')
