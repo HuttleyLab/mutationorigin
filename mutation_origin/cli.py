@@ -85,8 +85,8 @@ def sample_data(enu_path, germline_path, output_path, seed,
 
     enu = pandas.read_csv(enu_path, sep="\t", header=0)
     germline = pandas.read_csv(germline_path, sep="\t", header=0)
-    test_size = train_size
     train_size = train_size // 2
+    test_size = train_size
     train_enu_ratio, test_enu_ratio = enu_ratio
     enu_train_size, germ_train_size = get_enu_germline_sizes(train_size,
                                                              train_enu_ratio)
@@ -109,12 +109,12 @@ def sample_data(enu_path, germline_path, output_path, seed,
         enu_training, enu_testing = train_test_split(
             enu,
             test_size=enu_test_size,
-            train_size=train_size)
+            train_size=enu_train_size)
 
         germ_training, germ_testing = train_test_split(
             germline,
             test_size=germ_test_size,
-            train_size=train_size)
+            train_size=germ_train_size)
         if any(map(lambda x: x.shape[0] == 0,
                    [enu_training, enu_testing, germ_training, germ_testing])):
             raise RuntimeError("screw up in creating test/train set")
