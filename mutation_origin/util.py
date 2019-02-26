@@ -189,7 +189,8 @@ _feats = re.compile(r'f\d+[d\d]*p*[GC]*')
 
 
 def feature_set_from_path(path):
-    features = _feats.findall(path)[0]
+    features = _feats.findall(path)
+    features = features[-1]
     return features
 
 
