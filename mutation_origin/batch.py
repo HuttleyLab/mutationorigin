@@ -5,6 +5,8 @@ import glob
 import os
 os.environ['DONT_USE_MPI'] = "1"
 filterwarnings("ignore", ".*Not using MPI.*")
+filterwarnings("ignore", ".*is ill-defined.*")
+
 import click
 import pandas
 from tqdm import tqdm
@@ -27,7 +29,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _overwrite, _size_range, _model_range,
                                  _test_data_paths, _max_flank, _verbose,
                                  _strategy, _flank_sizes, _class_prior,
-                                 _excludes)
+                                 _excludes, _score)
 from mutation_origin.util import (dirname_from_features, flank_dim_combinations,
                                   exec_command, FILENAME_PATTERNS,
                                   sample_size_from_path,
@@ -160,6 +162,7 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
 @_output_path
 @_label_col
 @_seed
+@_score
 @_max_flank
 @_flank_sizes
 @_model_range
@@ -170,7 +173,7 @@ def get_train_kwarg_sets(training_path, output_path, max_flank,
 @_n_jobs
 @_overwrite
 @click.pass_context
-def lr_train(ctx, training_path, output_path, label_col, seed,
+def lr_train(ctx, training_path, output_path, label_col, seed, scoring,
              max_flank, flank_sizes, model_range, proximal,
              usegc, c_values, penalty_options, n_jobs, overwrite):
     """batch logistic regression training"""
@@ -200,6 +203,7 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
 @_output_path
 @_label_col
 @_seed
+@_score
 @_max_flank
 @_flank_sizes
 @_model_range
@@ -210,7 +214,7 @@ def lr_train(ctx, training_path, output_path, label_col, seed,
 @_n_jobs
 @_overwrite
 @click.pass_context
-def nb_train(ctx, training_path, output_path, label_col, seed,
+def nb_train(ctx, training_path, output_path, label_col, seed, scoring,
              max_flank, flank_sizes, model_range, proximal, usegc,
              alpha_options, class_prior, n_jobs, overwrite):
     """batch naive bayes training"""

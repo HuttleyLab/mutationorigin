@@ -156,3 +156,8 @@ _excludes = click.option("-ex", "--exclude_paths",
                          default=None,
                          type=click.Path(),
                          help="Paths to exclude, comma separated")
+_score = click.option('-sc', '--scoring',
+                         type=click.Choice(['au_roc', 'balanced_accuracy',
+                                            'f1']),
+                         default='au_roc',
+                         help="Scoring for classifier performance")

@@ -23,27 +23,27 @@ def one_class_svm(feat, seed):
     return svm
 
 
-def logistic_regression(feat, resp, seed, c_values, penalty_options, n_jobs):
+def logistic_regression(feat, resp, seed, scoring, c_values, penalty_options, n_jobs):
     """fits a logistic regression classifier using a grid search with CV"""
     param_grid = {'C': c_values, 'penalty': penalty_options}
     shuffle_split = ShuffleSplit(n_splits=1, test_size=0.5, random_state=seed)
     log_reg = LogisticRegression(class_weight='balanced', solver='liblinear',
                                  max_iter=1000)
     classifier = GridSearchCV(estimator=log_reg, param_grid=param_grid,
-                              scoring='roc_auc',
+                              scoring=scoring,
                               cv=shuffle_split,
                               n_jobs=n_jobs)
     classifier.fit(feat, resp)
     return classifier
 
 
-def naive_bayes(feat, resp, seed, alphas, class_prior=None, n_jobs=1):
+def naive_bayes(feat, resp, seed, alphas, scoring, class_prior=None, n_jobs=1):
     """fits a logistic regression classifier using a grid search with CV"""
     shuffle_split = ShuffleSplit(n_splits=1, test_size=0.5, random_state=seed)
     param_grid = {'alpha': alphas}
     nb = BernoulliNB(fit_prior=class_prior is None, class_prior=class_prior)
     classifier = GridSearchCV(estimator=nb, param_grid=param_grid,
-                              scoring='roc_auc',
+                              scoring=scoring,
                               cv=shuffle_split,
                               n_jobs=n_jobs)
     classifier.fit(feat, resp)

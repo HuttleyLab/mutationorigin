@@ -19,7 +19,7 @@ from mutation_origin.opt import (_seed, _feature_dim, _enu_path,
                                  _n_jobs, _classifier_path, _data_path,
                                  _predictions_path, _alpha_options,
                                  _overwrite, _verbose, _class_prior,
-                                 _strategy)
+                                 _strategy, _score)
 from mutation_origin.preprocess import data_to_numeric
 from mutation_origin.encoder import (get_scaler, inverse_transform_response,
                                      transform_response)
@@ -142,6 +142,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
 @_output_path
 @_label_col
 @_seed
+@_score
 @_flank_size
 @_feature_dim
 @_proximal
@@ -151,7 +152,7 @@ def sample_data(enu_path, germline_path, output_path, seed,
 @_n_jobs
 @_overwrite
 @_verbose
-def lr_train(training_path, output_path, label_col, seed,
+def lr_train(training_path, output_path, label_col, seed, scoring,
              flank_size, feature_dim, proximal,
              usegc, c_values, penalty_options, n_jobs, overwrite, verbose):
     """logistic regression training, validation, dumps optimal model"""
@@ -188,10 +189,12 @@ def lr_train(training_path, output_path, label_col, seed,
         # we need to scale the data
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
-    classifier = logistic_regression(feat, resp, seed, c_values,
+    classifier = logistic_regression(feat, resp, seed, scoring,
+                                     c_values,
                                      penalty_options.split(","), n_jobs)
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
-    result = dict(classifier=classifier.best_estimator_, betas=betas)
+    result = dict(classifier=classifier.best_estimator_, betas=betas,
+                  scoring=scoring)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal,
                                     usegc=usegc)
@@ -213,6 +216,7 @@ def lr_train(training_path, output_path, label_col, seed,
 @_output_path
 @_label_col
 @_seed
+@_score
 @_flank_size
 @_feature_dim
 @_proximal
@@ -222,7 +226,7 @@ def lr_train(training_path, output_path, label_col, seed,
 @_n_jobs
 @_overwrite
 @_verbose
-def nb_train(training_path, output_path, label_col, seed,
+def nb_train(training_path, output_path, label_col, seed, scoring,
              flank_size, feature_dim, proximal,
              usegc, alpha_options, class_prior, n_jobs, overwrite, verbose):
     """Naive Bayes training, validation, dumps optimal model"""
@@ -264,10 +268,11 @@ def nb_train(training_path, output_path, label_col, seed,
         # we need to scale the data
         scaler = get_scaler(feat)
         feat = scaler.transform(feat)
-    classifier = naive_bayes(feat, resp, seed, alpha_options,
+    classifier = naive_bayes(feat, resp, seed, alpha_options, scoring,
                              class_prior=class_prior, n_jobs=n_jobs)
     betas = dict(zip(names, classifier.best_estimator_.coef_.tolist()[0]))
-    result = dict(classifier=classifier.best_estimator_, betas=betas)
+    result = dict(classifier=classifier.best_estimator_, betas=betas,
+                  scoring=scoring)
     result['feature_params'] = dict(feature_dim=feature_dim,
                                     flank_size=flank_size, proximal=proximal,
                                     usegc=usegc)
