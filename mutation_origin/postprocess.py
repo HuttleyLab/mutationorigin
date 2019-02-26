@@ -48,8 +48,8 @@ def measure_performance(orig, predicted, label_col):
     result['auc'] = roc_auc_score(expect, new['scores'])
     result['mean_precision'] = average_precision_score(expect, new['scores'])
 
-    precision, recall, thresholds = precision_recall_curve(
-        expect, new['scores'])
+    precision, recall, thresholds = precision_recall_curve(expect,
+                                                           new['scores'])
     result['prcurve'] = dict(precision=precision.tolist(),
                              recall=recall.tolist(),
                              thresholds=thresholds.tolist())
