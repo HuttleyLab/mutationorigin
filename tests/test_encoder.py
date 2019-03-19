@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
-from cogent3.util.unit_test import TestCase, main
+from unittest import TestCase, main
 from mutation_origin.encoder import (transformed, onehot,
                              transform_response,
                              inverse_transform_response)

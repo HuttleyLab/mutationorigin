@@ -1,4 +1,4 @@
-from cogent3.util.unit_test import TestCase, main
+from unittest import TestCase, main
 from mutation_origin.feature import (isproximal, get_feature_indices,
                              feature_indices_upto, seq_2_features,
                              seq_feature_labels_upto)

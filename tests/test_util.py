@@ -1,4 +1,4 @@
-from cogent3.util.unit_test import TestCase, main
+from unittest import TestCase, main
 from mutation_origin.util import get_enu_germline_sizes, iter_indices
 
 __author__ = "Gavin Huttley"
