@@ -94,7 +94,7 @@ def load_predictions(path):
 
 def load_classifier(path):
     '''returns dict of pickled classifier and features info'''
-    with open(path, 'rb') as clf:
+    with open_(path, 'rb') as clf:
         classifier = pickle.load(clf)
     try:
         feature_params = classifier['feature_params']

@@ -28,7 +28,7 @@ from mutation_origin.classify import (logistic_regression, one_class_svm,
 from mutation_origin.util import (dump_json, load_predictions,
                                   get_basename, get_classifier_label,
                                   get_enu_germline_sizes, iter_indices,
-                                  load_classifier)
+                                  load_classifier, open_)
 from mutation_origin.postprocess import measure_performance
 
 
@@ -279,7 +279,7 @@ def nb_train(training_path, output_path, label_col, seed, scoring,
     if usegc:
         result['scaler'] = scaler
 
-    with open(outpath, 'wb') as clf_file:
+    with open_(outpath, 'wb') as clf_file:
         pickle.dump(result, clf_file)
 
     LOGGER.output_file(outpath)
